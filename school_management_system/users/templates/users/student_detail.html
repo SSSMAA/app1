@@ -1,0 +1,17 @@
+<h2>Student Profile: {{ student.username }}</h2>
+<p><strong>Role:</strong> {{ student.role }}</p>
+<p><strong>Email:</strong> {{ student.email }}</p>
+<p><strong>First Name:</strong> {{ student.first_name|default:"N/A" }}</p>
+<p><strong>Last Name:</strong> {{ student.last_name|default:"N/A" }}</p>
+<p><strong>Date of Birth:</strong> {{ student.date_of_birth|date:"Y-m-d"|default:"N/A" }}</p>
+<p><strong>Contact Number:</strong> {{ student.contact_number|default:"N/A" }}</p>
+{% if student.profile_picture %}
+    <p><strong>Profile Picture:</strong></p>
+    <img src="{{ student.profile_picture.url }}" alt="{{ student.username }}'s profile picture" style="max-width: 150px; max-height: 150px;">
+{% else %}
+    <p><strong>Profile Picture:</strong> Not set</p>
+{% endif %}
+
+<p><a href="{% url 'student_list' %}">Back to Student List</a></p>
+{# Optionally, add a link for admins to edit this profile directly if not relying solely on the admin panel #}
+{# Example: {% if request.user.role == 'admin' %} <a href="{% url 'admin_edit_student' student_id=student.pk %}">Edit Student Profile (Admin)</a> {% endif %} #}

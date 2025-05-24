@@ -1,0 +1,31 @@
+{% extends "users/base.html" %}
+
+{% block title %}Edit Lesson Material: {{ material.title }}{% endblock %}
+
+{% block content %}
+<h2>Edit Lesson Material</h2>
+<p><strong>Class:</strong> {{ class_instance.name }} ({{ class_instance.subject.name }})</p>
+<p><strong>Material:</strong> {{ material.title }}</p>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <p>Current file: 
+        {% if material.file %}
+            <a href="{{ material.file.url }}" target="_blank">{{ material.file.name|cut:"lesson_materials/" }}</a>
+        {% else %}
+            No file uploaded.
+        {% endif %}
+    </p>
+    <p class="form-text text-muted">Uploading a new file will replace the current one.</p>
+    
+    <button type="submit" class="btn btn-success">Save Changes</button>
+    <a href="{% url 'list_teacher_materials' class_id=class_instance.id %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

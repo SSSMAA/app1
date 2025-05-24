@@ -1,0 +1,13 @@
+<h2>Teacher List</h2>
+{% if teachers %}
+    <ul>
+        {% for teacher in teachers %}
+            <li>
+                {{ teacher.first_name }} {{ teacher.last_name }} ({{ teacher.email }})
+                - <a href="{% url 'teacher_detail' teacher_id=teacher.pk %}">View Details</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No teachers found.</p>
+{% endif %}

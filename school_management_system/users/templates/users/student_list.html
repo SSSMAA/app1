@@ -1,0 +1,13 @@
+<h2>Student List</h2>
+{% if students %}
+    <ul>
+        {% for student in students %}
+            <li>
+                {{ student.first_name }} {{ student.last_name }} ({{ student.email }})
+                - <a href="{% url 'student_detail' student_id=student.pk %}">View Details</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No students found.</p>
+{% endif %}

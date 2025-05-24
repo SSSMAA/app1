@@ -1,0 +1,59 @@
+{% extends "users/base.html" %}
+
+{% block title %}Manage Lesson Materials for {{ class_instance.name }}{% endblock %}
+
+{% block content %}
+<h2>Manage Lesson Materials</h2>
+<p><strong>Class:</strong> {{ class_instance.name }} ({{ class_instance.subject.name }})</p>
+
+<a href="{% url 'upload_lesson_material' class_id=class_instance.id %}" class="btn btn-primary mb-3">Upload New Material</a>
+<a href="{% url 'select_class_for_materials' %}" class="btn btn-secondary mb-3">Change Class</a>
+
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+{% if materials %}
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>File</th>
+                <th>Upload Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for material in materials %}
+                <tr>
+                    <td>{{ material.title }}</td>
+                    <td>{{ material.description|truncatewords:15|default:"N/A" }}</td>
+                    <td>
+                        {% if material.file %}
+                            <a href="{{ material.file.url }}" target="_blank">{{ material.file.name|cut:"lesson_materials/"|truncatechars:30 }}</a>
+                            (<a href="{% url 'download_lesson_material' material_id=material.id %}">Download</a>)
+                        {% else %}
+                            No file
+                        {% endif %}
+                    </td>
+                    <td>{{ material.upload_date|date:"Y-m-d" }}</td>
+                    <td>
+                        <a href="{% url 'edit_lesson_material' material_id=material.id %}" class="btn btn-sm btn-info">Edit</a>
+                        {# Delete button - typically a form or requires JavaScript for confirmation #}
+                        <form method="post" action="{% url 'delete_lesson_material' material_id=material.id %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete \'{{ material.title }}\'?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>You have not uploaded any materials for this class yet.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "users/base.html" %} {# Assuming you have a base template in users app or a project-wide one #}
+
+{% block title %}Select Class and Date for Attendance{% endblock %}
+
+{% block content %}
+<h2>Select Class and Date</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Proceed to Mark Attendance</button>
+</form>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} mt-2">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+{% endblock %}

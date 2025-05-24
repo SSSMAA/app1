@@ -1,0 +1,39 @@
+{% extends "users/base.html" %}
+
+{% block title %}{{ page_title|default:"Messages" }}{% endblock %}
+
+{% block content %}
+<h2>{{ page_title|default:"Messages" }}</h2>
+<a href="{% url 'compose_message' %}" class="btn btn-primary mb-3">Compose New Message</a>
+{% if is_inbox %}
+    <a href="{% url 'sent_messages' %}" class="btn btn-outline-secondary mb-3 ms-2">View Sent Messages</a>
+    <p>You have {{ unread_count }} unread message{{ unread_count|pluralize }}.</p>
+{% else %}
+    <a href="{% url 'inbox' %}" class="btn btn-outline-secondary mb-3 ms-2">View Inbox</a>
+{% endif %}
+
+
+{% if messages_list %}
+    <div class="list-group">
+        {% for msg in messages_list %}
+            <a href="{% url 'message_detail' message_id=msg.id %}" class="list-group-item list-group-item-action {% if is_inbox and not msg.is_read %}list-group-item-primary fw-bold{% endif %}">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">
+                        {% if is_inbox %}
+                            From: {{ msg.sender.get_full_name|default:msg.sender.username }}
+                        {% else %}
+                            To: {{ msg.recipient.get_full_name|default:msg.recipient.username }}
+                        {% endif %}
+                    </h5>
+                    <small>{{ msg.timestamp|date:"Y-m-d H:i" }}</small>
+                </div>
+                <p class="mb-1">{{ msg.subject|truncatechars:100 }}</p>
+                <small class="text-muted">Click to view message.</small>
+            </a>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No messages in your {{ page_title|lower }}.</p>
+{% endif %}
+
+{% endblock %}

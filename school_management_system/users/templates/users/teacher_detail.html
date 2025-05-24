@@ -1,0 +1,18 @@
+<h2>Teacher Profile: {{ teacher.username }}</h2>
+<p><strong>Role:</strong> {{ teacher.role }}</p>
+<p><strong>Email:</strong> {{ teacher.email }}</p>
+<p><strong>First Name:</strong> {{ teacher.first_name|default:"N/A" }}</p>
+<p><strong>Last Name:</strong> {{ teacher.last_name|default:"N/A" }}</p>
+<p><strong>Contact Number:</strong> {{ teacher.contact_number|default:"N/A" }}</p>
+{# Placeholder for subjects - will be added later #}
+{# <p><strong>Subjects Taught:</strong> ... </p> #}
+{% if teacher.profile_picture %}
+    <p><strong>Profile Picture:</strong></p>
+    <img src="{{ teacher.profile_picture.url }}" alt="{{ teacher.username }}'s profile picture" style="max-width: 150px; max-height: 150px;">
+{% else %}
+    <p><strong>Profile Picture:</strong> Not set</p>
+{% endif %}
+
+<p><a href="{% url 'teacher_list' %}">Back to Teacher List</a></p>
+{# Admins can edit teacher details via the Django admin panel.
+   The CustomUserAdmin in users/admin.py should already make all relevant fields editable. #}

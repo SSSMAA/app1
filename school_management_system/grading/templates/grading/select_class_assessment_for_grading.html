@@ -13,7 +13,7 @@
 
 <form method="post" id="gradingSelectionForm">
     {% csrf_token %}
-    
+
     {# Part 1: Select Class #}
     <div class="mb-3">
         <label for="{{ form.class_instance.id_for_label }}" class="form-label">{{ form.class_instance.label }}</label>
@@ -48,13 +48,13 @@
                 <div class="text-danger">{{ form.assessment_name_new.errors.as_text }}</div>
             {% endif %}
         </div>
-        
+
         {% if form.non_field_errors %}
             <div class="alert alert-danger">
                 {{ form.non_field_errors.as_ul }}
             </div>
         {% endif %}
-        
+
         <button type="submit" name="select_assessment_submit" class="btn btn-success">Proceed to Record Grades</button>
         <a href="{% url 'select_class_assessment_grading' %}" class="btn btn-secondary">Change Class</a>
     {% endif %}

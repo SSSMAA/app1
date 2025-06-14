@@ -130,6 +130,7 @@ AUTH_USER_MODEL = 'users.User'
 
 LOGIN_REDIRECT_URL = '/users/home/'
 LOGOUT_REDIRECT_URL = '/users/login/'
+LOGIN_URL = '/users/login/' # Define the login URL
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

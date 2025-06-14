@@ -27,7 +27,7 @@ class SelectClassAssessmentForm(forms.Form):
         super().__init__(*args, **kwargs)
         if teacher:
             self.fields['class_instance'].queryset = Class.objects.filter(teacher=teacher).order_by('name')
-        
+
         if class_instance:
             # Populate existing assessment names for the selected class
             existing_assessments = Grade.objects.filter(class_instance=class_instance)\
@@ -49,13 +49,13 @@ class SelectClassAssessmentForm(forms.Form):
             raise forms.ValidationError("You must select an existing assessment or provide a new assessment name.")
         if existing_assessment and new_assessment:
             raise forms.ValidationError("Please select an existing assessment OR enter a new one, not both.")
-        
+
         # Determine the final assessment name
         if new_assessment:
             cleaned_data['assessment_name'] = new_assessment
         elif existing_assessment:
             cleaned_data['assessment_name'] = existing_assessment
-        
+
         return cleaned_data
 
 class GradeForm(forms.ModelForm):
@@ -75,5 +75,5 @@ GradeFormSet = forms.modelformset_factory(
     Grade,
     form=GradeForm,
     extra=0, # Don't show empty forms by default
-    can_delete=False 
+    can_delete=False
 )

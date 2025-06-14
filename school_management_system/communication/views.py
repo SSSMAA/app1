@@ -13,12 +13,12 @@ class InboxView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         messages_list = Message.objects.filter(
-            recipient=request.user, 
+            recipient=request.user,
             recipient_deleted=False
         ).select_related('sender').order_by('-timestamp')
-        
+
         unread_count = messages_list.filter(is_read=False).count()
-        
+
         context = {
             'messages_list': messages_list,
             'unread_count': unread_count,
@@ -32,10 +32,10 @@ class SentMessagesView(LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         messages_list = Message.objects.filter(
-            sender=request.user, 
+            sender=request.user,
             sender_deleted=False
         ).select_related('recipient').order_by('-timestamp')
-        
+
         context = {
             'messages_list': messages_list,
             'page_title': 'Sent Messages',
@@ -69,7 +69,7 @@ class MessageDetailView(LoginRequiredMixin, View):
         if is_recipient and not message_obj.is_read:
             message_obj.is_read = True
             message_obj.save(update_fields=['is_read'])
-        
+
         context = {
             'message_obj': message_obj,
             'is_current_user_sender': is_sender
@@ -92,14 +92,14 @@ class ComposeMessageView(LoginRequiredMixin, View):
                 if not (original_message.sender == request.user or original_message.recipient == request.user):
                     messages.error(request, "You cannot reply to this message.")
                     return redirect('inbox')
-                
+
                 # If current user was the recipient, reply to sender. Else, reply to recipient.
                 # This logic for reply_to might be slightly off; usually reply is to the sender.
                 if original_message.sender == request.user: # User sent this, now wants to "reply" (more like follow-up)
                     initial_data['recipient'] = original_message.recipient
                 else: # User received this, replying to sender
                     initial_data['recipient'] = original_message.sender
-                
+
                 initial_data['subject'] = f"Re: {original_message.subject}"
                 if "\n--- Original Message ---" not in original_message.body: # Avoid multiple quote blocks
                     initial_data['body'] = f"\n\n\n--- Original Message ---\nFrom: {original_message.sender.username}\nTo: {original_message.recipient.username}\nDate: {original_message.timestamp.strftime('%Y-%m-%d %H:%M')}\nSubject: {original_message.subject}\n\n{original_message.body}"
@@ -114,11 +114,11 @@ class ComposeMessageView(LoginRequiredMixin, View):
                 if recipient not in temp_form_for_queryset_check.fields['recipient'].queryset:
                     messages.error(request, f"You are not permitted to send a message to {recipient.username}.")
                     # Redirect to a safe page, perhaps the compose page without recipient filled
-                    return redirect('compose_message') 
+                    return redirect('compose_message')
                 initial_data['recipient'] = recipient
             except User.DoesNotExist:
                 messages.error(request, "Recipient not found.")
-        
+
         form = self.form_class(user=request.user, initial=initial_data)
         return render(request, self.template_name, {'form': form})
 
@@ -130,7 +130,7 @@ class ComposeMessageView(LoginRequiredMixin, View):
             message.save()
             messages.success(request, f"Message sent to {message.recipient.username} successfully.")
             return redirect('sent_messages')
-        
+
         messages.error(request, "Please correct the errors below.")
         return render(request, self.template_name, {'form': form})
 
@@ -138,10 +138,10 @@ class ComposeMessageView(LoginRequiredMixin, View):
 class DeleteMessageView(LoginRequiredMixin, View):
     def post(self, request, message_id, *args, **kwargs):
         message_obj = get_object_or_404(Message, id=message_id)
-        
+
         # Determine if the request is from inbox or sent view to redirect appropriately
         # The 'origin' should be passed in the POST request from the template
-        origin = request.POST.get('origin', 'inbox') 
+        origin = request.POST.get('origin', 'inbox')
 
         if message_obj.sender == request.user:
             if not message_obj.sender_deleted:

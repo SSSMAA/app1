@@ -3,15 +3,24 @@ from django.contrib.auth.views import LogoutView
 from .views import (
     TeacherRegistrationView, StudentRegistrationView, UserLoginView, home_view,
     StudentProfileView, StudentProfileEditView, StudentListView, StudentDetailView,
-    TeacherProfileView, TeacherProfileEditView, TeacherListView, TeacherDetailView
+    TeacherProfileView, TeacherProfileEditView, TeacherListView, TeacherDetailView,
+    AdminDashboardView, TeacherDashboardView, StudentDashboardView # Added Dashboard Views
 )
 
 urlpatterns = [
+    # Original Auth and Profile URLs
     path('register/teacher/', TeacherRegistrationView.as_view(), name='register_teacher'),
     path('register/student/', StudentRegistrationView.as_view(), name='register_student'),
     path('login/', UserLoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(next_page='login'), name='logout'), # Redirect to login after logout
-    path('home/', home_view, name='home'), # Simple home page
+    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+
+    # Home/Dispatch view - this is the main landing after login
+    path('home/', home_view, name='home'),
+
+    # Role-based Dashboards
+    path('dashboard/admin/', AdminDashboardView.as_view(), name='admin_dashboard'),
+    path('dashboard/teacher/', TeacherDashboardView.as_view(), name='teacher_dashboard'),
+    path('dashboard/student/', StudentDashboardView.as_view(), name='student_dashboard'),
 
     # Student profile URLs
     path('profile/', StudentProfileView.as_view(), name='student_profile'),

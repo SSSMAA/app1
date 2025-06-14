@@ -37,7 +37,7 @@ class TeacherProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Optionally, make some fields read-only if needed, e.g., email, though it's included in fields.
-        # self.fields['email'].disabled = True 
+        # self.fields['email'].disabled = True
         # self.fields['role'].disabled = True # Role is not in fields, but if it were.
 
 class StudentRegistrationForm(UserCreationForm):

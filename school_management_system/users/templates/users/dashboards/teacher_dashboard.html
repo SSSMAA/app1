@@ -1,0 +1,36 @@
+{% extends "users/base.html" %}
+
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Teacher Dashboard</h2>
+    <p>Welcome, {{ user.get_full_name|default:user.username }}!</p>
+    <hr>
+
+    <h4>Key Actions & Links:</h4>
+    <div class="list-group">
+        <a href="{% url 'teacher_profile' %}" class="list-group-item list-group-item-action">My Profile</a>
+        {# Assuming a view exists for viewing own schedule based on assigned classes #}
+        {# <a href="{% url 'view_my_schedule' %}" class="list-group-item list-group-item-action">View My Schedule</a> #}
+        <a href="{% url 'select_class_date_attendance' %}" class="list-group-item list-group-item-action">Mark/Update Attendance</a>
+        <a href="{% url 'select_class_assessment_grading' %}" class="list-group-item list-group-item-action">Record/Update Grades</a>
+        <a href="{% url 'select_class_for_materials' %}" class="list-group-item list-group-item-action">Manage Lesson Materials</a>
+        <a href="{% url 'inbox' %}" class="list-group-item list-group-item-action">View Messages</a>
+    </div>
+
+    <h4 class="mt-4">My Classes (Placeholder):</h4>
+    {# This section would list classes taught by the teacher #}
+    <ul>
+        <li>Class 1: [Subject] - [No. of Students] (Link to class details/roster)</li>
+        <li>Class 2: [Subject] - [No. of Students]</li>
+        {# To be implemented with actual data later #}
+    </ul>
+
+    <h4 class="mt-4">Upcoming Deadlines/Events (Placeholder):</h4>
+    <ul>
+        <li>Assignment X due for Class Y on [Date]</li>
+        {# To be implemented #}
+    </ul>
+</div>
+{% endblock %}

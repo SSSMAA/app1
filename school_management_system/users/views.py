@@ -40,15 +40,32 @@ class UserLoginView(LoginView):
 # No explicit view class needed here if using default behavior mostly.
 # However, if you need to override get_next_page or other methods, you would.
 
+from django.contrib.auth.decorators import login_required # Import login_required
+
+@login_required # Ensure user is logged in to access home_view
 def home_view(request):
-    # A simple home page view to redirect to after login
-    # This should be replaced with a more meaningful home page later.
-    return render(request, 'users/home.html')
+    """
+    Redirects users to their respective dashboards based on their role.
+    """
+    if request.user.role == 'admin':
+        return redirect(reverse_lazy('admin_dashboard'))
+    elif request.user.role == 'teacher':
+        return redirect(reverse_lazy('teacher_dashboard'))
+    elif request.user.role == 'student':
+        return redirect(reverse_lazy('student_dashboard'))
+    else:
+        # Fallback for users with no role or unexpected role (should not happen)
+        # Or, if there's a generic page for users without a specific dashboard
+        messages.warning(request, "Your role does not have a specific dashboard. Contact support if you believe this is an error.")
+        # Redirect to login or a generic landing page. For now, logout and redirect to login.
+        # from django.contrib.auth import logout
+        # logout(request)
+        return redirect(reverse_lazy('login')) # Or a generic 'welcome' page
 
 # Permissions
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, View # Added View
 from django.views.generic.edit import UpdateView
 
 
@@ -175,3 +192,37 @@ class TeacherDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     def get_queryset(self):
         # Ensure that only teachers can be viewed through this detail view by admins
         return User.objects.filter(role='teacher')
+
+# Role-based Dashboards
+class AdminDashboardView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = 'users/dashboards/admin_dashboard.html'
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.role == 'admin'
+
+    def get(self, request, *args, **kwargs):
+        context = {'user': request.user}
+        # Add any specific context for admin dashboard later
+        return render(request, self.template_name, context)
+
+class TeacherDashboardView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = 'users/dashboards/teacher_dashboard.html'
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.role == 'teacher'
+
+    def get(self, request, *args, **kwargs):
+        context = {'user': request.user}
+        # Add any specific context for teacher dashboard later
+        return render(request, self.template_name, context)
+
+class StudentDashboardView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = 'users/dashboards/student_dashboard.html'
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.role == 'student'
+
+    def get(self, request, *args, **kwargs):
+        context = {'user': request.user}
+        # Add any specific context for student dashboard later
+        return render(request, self.template_name, context)

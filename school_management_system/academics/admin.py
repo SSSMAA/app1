@@ -53,7 +53,7 @@ class LessonMaterialAdmin(admin.ModelAdmin):
         # it's more complex and might require overriding get_form or get_queryset.
         # For now, ensuring uploaded_by is a teacher is a good step.
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-    
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         # If not superuser, filter materials by the logged-in teacher (if they are a teacher)

@@ -51,7 +51,7 @@ class MarkAttendanceView(LoginRequiredMixin, UserPassesTestMixin, View):
     def get(self, request, class_id, date, *args, **kwargs):
         class_instance = get_object_or_404(Class, id=class_id, teacher=request.user)
         students = class_instance.enrolled_students.all().order_by('last_name', 'first_name')
-        
+
         initial_data_for_formset = []
         for student in students:
             attendance_obj, created = Attendance.objects.get_or_create(
@@ -62,16 +62,16 @@ class MarkAttendanceView(LoginRequiredMixin, UserPassesTestMixin, View):
             )
             initial_data_for_formset.append({
                 'id': attendance_obj.id, # Important for updates
-                'student': student.id, 
-                'class_instance': class_instance.id, 
+                'student': student.id,
+                'class_instance': class_instance.id,
                 'date': date,
                 'status': attendance_obj.status,
                 'remarks': attendance_obj.remarks
             })
-        
+
         # Use the initial data with the formset
         formset = AttendanceFormSet(initial=initial_data_for_formset, queryset=Attendance.objects.none())
-        
+
         # Pair forms with student names for easier template rendering
         student_forms = []
         for i, student in enumerate(students):
@@ -85,8 +85,8 @@ class MarkAttendanceView(LoginRequiredMixin, UserPassesTestMixin, View):
                  # For safety, create a blank form for any remaining students.
                  # This part needs careful testing.
                  temp_form = AttendanceForm(initial={
-                     'student': student.id, 
-                     'class_instance': class_instance.id, 
+                     'student': student.id,
+                     'class_instance': class_instance.id,
                      'date': date,
                      'status': 'Present' # Default
                  })
@@ -111,7 +111,7 @@ class MarkAttendanceView(LoginRequiredMixin, UserPassesTestMixin, View):
             for form in formset.cleaned_data: # Iterate over each form's cleaned_data
                 if not form: # Can happen if a form in the formset was empty and not submitted
                     continue
-                
+
                 student_id = form.get('student') # student is a ModelChoiceField in the form
                 status = form.get('status')
                 remarks = form.get('remarks', '') # Get remarks, default to empty string
@@ -121,7 +121,7 @@ class MarkAttendanceView(LoginRequiredMixin, UserPassesTestMixin, View):
                     # Re-render form with error, need to reconstruct context
                     # This part is complex, ideally form validation should catch this.
                     # For now, redirecting to GET.
-                    return redirect(request.path) 
+                    return redirect(request.path)
 
                 student = User.objects.get(id=student_id.id) # Get the User instance
 
@@ -132,7 +132,7 @@ class MarkAttendanceView(LoginRequiredMixin, UserPassesTestMixin, View):
                     date=date,
                     defaults={'status': status, 'remarks': remarks}
                 )
-            
+
             messages.success(request, f"Attendance for {class_instance.name} on {date} saved successfully.")
             return redirect(reverse('select_class_date_attendance'))
         else:
@@ -167,7 +167,7 @@ class StudentAttendanceView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def get(self, request, *args, **kwargs):
         attendance_records = Attendance.objects.filter(student=request.user).select_related('class_instance', 'class_instance__subject').order_by('-date', 'class_instance__name')
-        
+
         context = {
             'attendance_records': attendance_records,
         }

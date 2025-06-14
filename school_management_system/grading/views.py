@@ -30,14 +30,14 @@ class SelectClassAssessmentView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         if class_id:
             class_instance = get_object_or_404(Class, id=class_id, teacher=request.user)
-            initial_form_data['class_instance'] = class_instance 
-        
+            initial_form_data['class_instance'] = class_instance
+
         form = self.form_class(teacher=request.user, class_instance=class_instance, initial=initial_form_data)
         return render(request, self.template_name, {'form': form, 'selected_class': class_instance})
 
     def post(self, request, *args, **kwargs):
         # This view now handles a two-step process via GET parameters and specific submit button names
-        
+
         # Step 1: Teacher selects a class and submits.
         if 'select_class_submit' in request.POST:
             class_id = request.POST.get('class_instance')
@@ -66,10 +66,10 @@ class SelectClassAssessmentView(LoginRequiredMixin, UserPassesTestMixin, View):
             assessment_name = form.cleaned_data['assessment_name']
             # Proceed to record grades page
             return redirect(reverse('record_grades', kwargs={
-                'class_id': class_instance.id, 
+                'class_id': class_instance.id,
                 'assessment_name': assessment_name
             }))
-        
+
         # Form is invalid, re-render with errors, preserving selected class for context
         return render(request, self.template_name, {'form': form, 'selected_class': class_instance})
 
@@ -89,7 +89,7 @@ class RecordGradesView(LoginRequiredMixin, UserPassesTestMixin, View):
     def get(self, request, class_id, assessment_name, *args, **kwargs):
         class_instance = get_object_or_404(Class, id=class_id, teacher=request.user)
         students = class_instance.enrolled_students.all().order_by('last_name', 'first_name')
-        
+
         initial_data = []
         for student in students:
             grade_obj, created = Grade.objects.get_or_create(
@@ -99,20 +99,20 @@ class RecordGradesView(LoginRequiredMixin, UserPassesTestMixin, View):
                 defaults={'grade': ''} # Default grade to empty
             )
             initial_data.append({
-                'id': grade_obj.id, 
+                'id': grade_obj.id,
                 'student': student.id,
                 'class_instance': class_instance.id,
                 'assessment_name': assessment_name,
                 'grade': grade_obj.grade,
                 'comments': grade_obj.comments
             })
-        
+
         formset = GradeFormSet(initial=initial_data, queryset=Grade.objects.none())
-        
+
         student_forms = []
         for i, student in enumerate(students):
             student_name = f"{student.first_name} {student.last_name} ({student.username})"
-            if i < len(formset.forms): 
+            if i < len(formset.forms):
                 student_forms.append({'student_name': student_name, 'form': formset.forms[i]})
 
         context = {
@@ -131,14 +131,14 @@ class RecordGradesView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         if formset.is_valid():
             for form_data_dict in formset.cleaned_data: # cleaned_data is a list of dicts
-                if not form_data_dict: continue 
+                if not form_data_dict: continue
 
                 student_instance = form_data_dict.get('student') # This is a User instance
                 grade_value = form_data_dict.get('grade')
                 comments_value = form_data_dict.get('comments', '')
-                
+
                 # The ID of the Grade object itself, if updating
-                grade_id = form_data_dict.get('id') 
+                grade_id = form_data_dict.get('id')
 
                 if not student_instance:
                     # This should ideally be caught by form validation if student field is required
@@ -151,7 +151,7 @@ class RecordGradesView(LoginRequiredMixin, UserPassesTestMixin, View):
                     assessment_name=assessment_name,
                     defaults={'grade': grade_value, 'comments': comments_value}
                 )
-            
+
             messages.success(request, f"Grades for '{assessment_name}' in {class_instance.name} saved successfully.")
             # Redirect back to the selection page, perhaps pre-filling the class
             return redirect(reverse('select_class_assessment_grading') + f'?class_instance={class_instance.id}')
@@ -164,7 +164,7 @@ class RecordGradesView(LoginRequiredMixin, UserPassesTestMixin, View):
                 student_name = f"{student.first_name} {student.last_name} ({student.username})"
                 if i < len(formset.forms): # Ensure alignment
                     student_forms.append({'student_name': student_name, 'form': formset.forms[i]})
-            
+
             context = {
                 'class_instance': class_instance,
                 'assessment_name': assessment_name,
@@ -186,7 +186,7 @@ class StudentGradesView(LoginRequiredMixin, UserPassesTestMixin, View):
         grades = Grade.objects.filter(student=request.user)\
                               .select_related('class_instance', 'class_instance__subject')\
                               .order_by('class_instance__name', '-date_recorded', 'assessment_name')
-        
+
         selected_class_id = request.GET.get('class_filter')
         # Students should only be able to filter by classes they are enrolled in.
         enrolled_classes = Class.objects.filter(enrolled_students=request.user).order_by('name')
@@ -199,7 +199,7 @@ class StudentGradesView(LoginRequiredMixin, UserPassesTestMixin, View):
                 # Handle case where student tries to filter by a class they are not in (e.g. manipulated URL)
                 messages.warning(request, "You can only filter by classes you are enrolled in.")
                 selected_class_id = None # Reset filter
-        
+
         context = {
             'grades': grades,
             'enrolled_classes': enrolled_classes,

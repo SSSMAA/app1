@@ -1,18 +1,45 @@
-{% extends "users/base.html" %} {# Assuming you have a base template in users app or a project-wide one #}
+{% extends "users/base.html" %}
 
 {% block title %}Select Class and Date for Attendance{% endblock %}
 
 {% block content %}
-<h2>Select Class and Date</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Proceed to Mark Attendance</button>
-</form>
+<div class="container mt-4">
+    <h2 class="mb-4">Select Class and Date for Attendance</h2>
+    <form method="post" novalidate>
+        {% csrf_token %}
 
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} mt-2">{{ message }}</div>
-    {% endfor %}
-{% endif %}
+        {% for field in form %}
+            <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {% if field.name == 'date' %}
+                     <input type="date"
+                           name="{{ field.name }}"
+                           id="{{ field.id_for_label }}"
+                           class="form-control {% if field.errors %}is-invalid{% endif %}"
+                           {% if field.field.required %}required{% endif %}
+                           value="{{ field.value|default:''|date:'Y-m-d' }}">
+                {% else %}
+                    {{ field.as_widget(attrs={'class': 'form-select'}) }}
+                {% endif %}
+                {% if field.errors %}
+                    <div class="invalid-feedback">
+                        {{ field.errors|join:", " }}
+                    </div>
+                {% endif %}
+                {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors.as_ul }}
+            </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary w-100">Proceed to Mark Attendance</button>
+    </form>
+</div>
+
 {% endblock %}

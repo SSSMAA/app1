@@ -1,0 +1,39 @@
+{% extends "users/base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Admin Dashboard</h2>
+    <p>Welcome, {{ user.get_full_name|default:user.username }}!</p>
+    <hr>
+
+    <h4>Key Management Areas:</h4>
+    <div class="list-group">
+        <a href="{% url 'admin:index' %}" class="list-group-item list-group-item-action">Full Admin Panel (User & System Management)</a>
+        {# Direct links to specific admin sections can be added if preferred over just the main admin panel #}
+        <a href="{% url 'admin:users_user_changelist' %}" class="list-group-item list-group-item-action">Manage Users (Students, Teachers, Admins)</a>
+        <a href="{% url 'admin:academics_subject_changelist' %}" class="list-group-item list-group-item-action">Manage Subjects</a>
+        <a href="{% url 'admin:academics_class_changelist' %}" class="list-group-item list-group-item-action">Manage Classes & Schedules</a>
+        <a href="{% url 'admin:academics_lessonmaterial_changelist' %}" class="list-group-item list-group-item-action">Manage All Lesson Materials</a>
+        <a href="{% url 'admin:attendance_attendance_changelist' %}" class="list-group-item list-group-item-action">View/Manage All Attendance Records</a>
+        <a href="{% url 'admin:grading_grade_changelist' %}" class="list-group-item list-group-item-action">View/Manage All Grades</a>
+        <a href="{% url 'admin:communication_message_changelist' %}" class="list-group-item list-group-item-action">View All System Messages</a>
+    </div>
+
+    <h4 class="mt-4">Quick Actions:</h4>
+     <div class="list-group">
+        <a href="{% url 'admin:users_user_add' %}" class="list-group-item list-group-item-action">Add New User</a>
+        <a href="{% url 'register_teacher' %}" class="list-group-item list-group-item-action">Register New Teacher (Frontend Form)</a>
+        <a href="{% url 'register_student' %}" class="list-group-item list-group-item-action">Register New Student (Frontend Form)</a>
+        <a href="{% url 'admin:academics_class_add' %}" class="list-group-item list-group-item-action">Create New Class</a>
+    </div>
+
+    <h4 class="mt-4">System Statistics (Placeholder):</h4>
+    <ul>
+        <li>Total Students: [To be implemented]</li>
+        <li>Total Teachers: [To be implemented]</li>
+        <li>Total Active Classes: [To be implemented]</li>
+    </ul>
+</div>
+{% endblock %}

@@ -40,7 +40,7 @@ class SelectClassForMaterialsView(LoginRequiredMixin, View):
                 return redirect(reverse('list_student_materials', kwargs={'class_id': class_instance.id}))
             else:
                 messages.error(request, "Your role does not have a designated materials page.")
-                return redirect('home') 
+                return redirect('home')
         return render(request, self.template_name, {'form': form, 'user_role': request.user.role})
 
 
@@ -69,7 +69,7 @@ class UploadLessonMaterialView(LoginRequiredMixin, UserPassesTestMixin, View):
         class_instance = get_object_or_404(Class, id=class_id, teacher=request.user)
         # Initialize form with POST data, FILES data, and limit class_instance choices for the teacher
         form = self.form_class(request.POST, request.FILES, teacher=request.user)
-        
+
         # Since class_instance is disabled, it won't be in request.POST.
         # We need to ensure the model instance gets it before validation/saving.
         if form.is_valid():
@@ -95,7 +95,7 @@ class ListTeacherMaterialsView(LoginRequiredMixin, UserPassesTestMixin, View):
         if not is_teacher(self.request.user): return False
         class_id = self.kwargs.get('class_id')
         class_instance = get_object_or_404(Class, id=class_id)
-        return class_instance.teacher == self.request.user 
+        return class_instance.teacher == self.request.user
 
     def get(self, request, class_id, *args, **kwargs):
         class_instance = get_object_or_404(Class, id=class_id, teacher=request.user)
@@ -104,7 +104,7 @@ class ListTeacherMaterialsView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 
 class EditLessonMaterialView(LoginRequiredMixin, UserPassesTestMixin, View):
-    template_name = 'academics/edit_lesson_material.html' 
+    template_name = 'academics/edit_lesson_material.html'
     form_class = LessonMaterialForm
 
     def test_func(self):
@@ -124,12 +124,12 @@ class EditLessonMaterialView(LoginRequiredMixin, UserPassesTestMixin, View):
     def post(self, request, material_id, *args, **kwargs):
         material = get_object_or_404(LessonMaterial, id=material_id, uploaded_by=request.user)
         form = self.form_class(request.POST, request.FILES, instance=material, teacher=request.user)
-        
+
         if form.is_valid():
             updated_material = form.save(commit=False)
             # Ensure fixed fields are not changed
-            updated_material.uploaded_by = request.user 
-            updated_material.class_instance = material.class_instance 
+            updated_material.uploaded_by = request.user
+            updated_material.class_instance = material.class_instance
             updated_material.save()
             messages.success(request, f"Material '{updated_material.title}' updated successfully.")
             return redirect(reverse('list_teacher_materials', kwargs={'class_id': material.class_instance.id}))
@@ -151,7 +151,7 @@ class DeleteLessonMaterialView(LoginRequiredMixin, UserPassesTestMixin, View):
     def post(self, request, material_id, *args, **kwargs):
         material = get_object_or_404(LessonMaterial, id=material_id, uploaded_by=request.user)
         class_id_of_material = material.class_instance.id # Save for redirect
-        
+
         # Attempt to delete the file from storage
         try:
             if material.file and os.path.exists(material.file.path):
@@ -159,7 +159,7 @@ class DeleteLessonMaterialView(LoginRequiredMixin, UserPassesTestMixin, View):
         except Exception as e:
             messages.warning(request, f"Could not delete the file for '{material.title}'. Error: {e}")
             # Decide if you want to proceed with deleting the DB record even if file deletion fails
-        
+
         material_title = material.title # Save for message
         material.delete()
         messages.success(request, f"Material '{material_title}' deleted successfully.")
@@ -179,7 +179,7 @@ class ListStudentMaterialsView(LoginRequiredMixin, UserPassesTestMixin, View):
         class_instance = get_object_or_404(Class, id=class_id)
         if not class_instance.enrolled_students.filter(id=request.user.id).exists():
             return HttpResponseForbidden("You are not enrolled in this class.")
-            
+
         materials = LessonMaterial.objects.filter(class_instance=class_instance).order_by('-upload_date')
         return render(request, self.template_name, {'materials': materials, 'class_instance': class_instance})
 
@@ -187,7 +187,7 @@ class DownloadLessonMaterialView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
         if not (is_student(self.request.user) or is_teacher(self.request.user)):
             return False
-        
+
         material_id = self.kwargs.get('material_id')
         material = get_object_or_404(LessonMaterial, id=material_id)
         class_instance = material.class_instance

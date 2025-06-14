@@ -9,88 +9,87 @@
     <link rel="stylesheet" href="{% static 'users/vendor/bootstrap/css/bootstrap.min.css' %}">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'users/css/custom.css' %}">
-    <style>
-        body { padding-top: 5rem; } /* Adjust if navbar height changes */
-        .navbar { border-bottom: 1px solid #dee2e6; }
-        .alert { margin-top: 1rem; }
-    </style>
+    {# Removed inline styles, they are now in custom.css or handled by Bootstrap #}
 </head>
 <body>
 
-<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'home' %}">SMS Home</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+<header>
+    <nav class="navbar navbar-expand-md navbar-custom fixed-top"> {# Using navbar-custom #}
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'home' %}">SMS Home</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                <li class="nav-item">
-                    <a class="nav-link {% if request.path == home_url %}active{% endif %}" href="{% url 'home' %}" aria-current="page">Dashboard</a>
-                </li>
-                {% if user.is_authenticated %}
-                    {% if user.role == 'admin' %}
-                        <li class="nav-item"><a class="nav-link {% if request.path|slice:":6" == '/admin' %}active{% endif %}" href="{% url 'admin:index' %}">Admin Panel</a></li>
-                    {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == inbox_url %}active{% endif %}" href="{% url 'inbox' %}">
-                            Messages
-                            {# Placeholder for unread message count - to be implemented later if needed #}
-                            {# {% if unread_message_count > 0 %}<span class="badge bg-danger">{{ unread_message_count }}</span>{% endif %} #}
-                        </a>
-                    </li>
-                {% endif %}
-            </ul>
-            <ul class="navbar-nav ms-auto">
-                {% url 'home' as home_url %} {# Define for use in active class logic #}
-                {% url 'inbox' as inbox_url %} {# Define for use in active class logic #}
-                {% if user.is_authenticated %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">{{ user.username }} ({{ user.get_role_display }})</a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown01">
-                            {% if user.role == 'student' %}
-                                <li><a class="dropdown-item {% if request.path == student_profile_url %}active{% endif %}" href="{% url 'student_profile' %}">My Profile</a></li>
-                            {% elif user.role == 'teacher' %}
-                                <li><a class="dropdown-item {% if request.path == teacher_profile_url %}active{% endif %}" href="{% url 'teacher_profile' %}">My Profile</a></li>
-                            {% endif %}
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form action="{% url 'logout' %}" method="post" style="margin: 0;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="dropdown-item">Logout</button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
+            <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    {% url 'home' as home_url %}
+                    {% url 'inbox' as inbox_url %}
+                    {# Define other common URLs for active class logic if needed #}
                     {% url 'student_profile' as student_profile_url %}
                     {% url 'teacher_profile' as teacher_profile_url %}
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == login_url %}active{% endif %}" href="{% url 'login' %}">Login</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                         <a class="nav-link dropdown-toggle {% if request.path == register_student_url or request.path == register_teacher_url %}active{% endif %}" href="#" id="registerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                           Register
-                         </a>
-                         <ul class="dropdown-menu" aria-labelledby="registerDropdown">
-                           <li><a class="dropdown-item {% if request.path == register_student_url %}active{% endif %}" href="{% url 'register_student' %}">Register as Student</a></li>
-                           <li><a class="dropdown-item {% if request.path == register_teacher_url %}active{% endif %}" href="{% url 'register_teacher' %}">Register as Teacher</a></li>
-                         </ul>
-                    </li>
                     {% url 'login' as login_url %}
                     {% url 'register_student' as register_student_url %}
                     {% url 'register_teacher' as register_teacher_url %}
-                    </li>
-                {% endif %}
-            </ul>
-        </div>
-    </div>
-</nav>
 
-<main class="container">
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == home_url %}active{% endif %}" href="{% url 'home' %}" aria-current="page">Dashboard</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        {% if user.role == 'admin' %}
+                            <li class="nav-item"><a class="nav-link {% if request.path|slice:":6" == '/admin' %}active{% endif %}" href="{% url 'admin:index' %}">Admin Panel</a></li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == inbox_url %}active{% endif %}" href="{% url 'inbox' %}">
+                                Messages
+                                {# Placeholder for unread message count - to be implemented later if needed #}
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-bs-toggle="dropdown" aria-expanded="false">{{ user.username }} ({{ user.get_role_display }})</a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown01">
+                                {% if user.role == 'student' %}
+                                    <li><a class="dropdown-item {% if request.path == student_profile_url %}active{% endif %}" href="{% url 'student_profile' %}">My Profile</a></li>
+                                {% elif user.role == 'teacher' %}
+                                    <li><a class="dropdown-item {% if request.path == teacher_profile_url %}active{% endif %}" href="{% url 'teacher_profile' %}">My Profile</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form action="{% url 'logout' %}" method="post" style="margin: 0;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item">Logout</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == login_url %}active{% endif %}" href="{% url 'login' %}">Login</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                             <a class="nav-link dropdown-toggle {% if request.path == register_student_url or request.path == register_teacher_url %}active{% endif %}" href="#" id="registerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                               Register
+                             </a>
+                             <ul class="dropdown-menu" aria-labelledby="registerDropdown">
+                               <li><a class="dropdown-item {% if request.path == register_student_url %}active{% endif %}" href="{% url 'register_student' %}">Register as Student</a></li>
+                               <li><a class="dropdown-item {% if request.path == register_teacher_url %}active{% endif %}" href="{% url 'register_teacher' %}">Register as Teacher</a></li>
+                             </ul>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main class="container main-container"> {# Added main-container class #}
     {% if messages %}
-        <div class="mt-3">
+        <div class="mt-0"> {# Removed mt-3 to rely on main-container padding or alert margin #}
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                     {{ message }}
@@ -103,6 +102,12 @@
     <!-- Page content will be rendered here -->
     {% endblock %}
 </main><!-- /.container -->
+
+<footer class="footer">
+    <div class="container">
+        <p>&copy; {% now "Y" %} 314.ma - School Management System. All rights reserved.</p>
+    </div>
+</footer>
 
 <!-- Local Bootstrap JS Bundle -->
 <script src="{% static 'users/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>

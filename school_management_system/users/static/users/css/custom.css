@@ -1,0 +1,279 @@
+/* custom.css */
+
+:root {
+    --primary-bg-color: #f8f9fa; /* Light grey */
+    --secondary-bg-color: #ffffff; /* White */
+    --primary-text-color: #343a40; /* Darker grey, Bootstrap's --bs-gray-dark */
+    --secondary-text-color: #6c757d; /* Bootstrap's --bs-gray */
+    --accent-color: #5E72E4; /* Modern blue/purple */
+    --border-color: #dee2e6; /* Bootstrap's --bs-gray-300 */
+    --link-color: #007bff; /* Bootstrap's default blue, or use --accent-color */
+    --link-hover-color: #0056b3;
+}
+
+/* Global box-sizing */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--primary-bg-color);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; /* System font stack */
+    color: var(--primary-text-color);
+    line-height: 1.6;
+    padding-top: 5rem; /* From base.html, ensure consistency */
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--primary-text-color);
+    font-weight: 500; /* Slightly bolder than default for clarity */
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+h1 { font-size: 2.25rem; font-weight: 600; }
+h2 { font-size: 1.875rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.125rem; }
+h6 { font-size: 1rem; }
+
+/* Adjust heading margins for context */
+.card-header h1, .card-header h2, .card-header h3, .card-header h4, .card-header h5, .card-header h6,
+.card-body h1:first-child, .card-body h2:first-child, .card-body h3:first-child,
+.card-body h4:first-child, .card-body h5:first-child, .card-body h6:first-child {
+    margin-top: 0; /* Remove top margin if heading is first element in card header/body */
+}
+
+p {
+    color: var(--secondary-text-color);
+    margin-bottom: 1rem;
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: none; /* Minimalist: underline on hover only */
+}
+
+a:hover {
+    color: var(--link-hover-color);
+    text-decoration: underline;
+}
+
+/* Navigation Bar Adjustments (if needed, to complement Bootstrap's dark theme) */
+.navbar-dark .navbar-brand {
+    color: #fff;
+}
+.navbar-dark .nav-link {
+    color: rgba(255, 255, 255, 0.75);
+}
+.navbar-dark .nav-link:hover,
+.navbar-dark .nav-link:focus,
+.navbar-dark .nav-link.active {
+    color: #fff;
+}
+
+/* Card Styling (Example for consistent card appearance) */
+.card {
+    background-color: var(--secondary-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem; /* Softer, more rounded corners */
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* Softer, more diffused shadow */
+}
+.card-header {
+    background-color: var(--secondary-bg-color); /* Cleaner: white header */
+    border-bottom: 1px solid var(--border-color);
+    color: var(--primary-text-color);
+    padding: 0.75rem 1.25rem; /* Standard Bootstrap padding */
+    font-weight: 500;
+}
+.card-title {
+    color: var(--primary-text-color);
+    /* Ensure card-title specific margins are appropriate, often mb-0 if in card-header */
+}
+.card-body {
+    padding: 1.25rem; /* Standard Bootstrap padding */
+}
+.card-body p:last-child {
+    margin-bottom: 0; /* Remove bottom margin for last paragraph in card body */
+}
+
+/* Definition List Styling for Profile Pages */
+dl.row { /* Assuming Bootstrap's row class for layout */
+    margin-bottom: 1rem;
+}
+dl.row dt {
+    color: var(--primary-text-color);
+    font-weight: 500; /* Bootstrap default is 700, making it slightly lighter */
+}
+dl.row dd {
+    color: var(--secondary-text-color);
+    margin-bottom: .5rem; /* Space between dd items */
+}
+
+
+/* Button Styling (ensure consistency if overriding Bootstrap) */
+.btn-primary {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+.btn-primary:hover {
+    background-color: #4a5db8; /* Darken accent color on hover */
+    border-color: #4a5db8;
+}
+
+/* Form Control Styling (subtle adjustments if needed) */
+.form-control, .form-select {
+    border-color: var(--border-color);
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.25rem rgba(var(--accent-color-rgb, 94, 114, 228), 0.25); /* Use RGB of accent color if defined */
+}
+
+/* Alerts - ensure they stand out but fit the theme */
+.alert {
+    border-width: 1px;
+    border-style: solid;
+}
+/* Example: make success alerts use the accent color subtly */
+.alert-success {
+    background-color: #e6f7ff; /* Light blue/green */
+    border-color: var(--accent-color);
+    color: var(--primary-text-color);
+}
+
+/* Utility class for main content sections for consistent padding */
+.main-content-section {
+    padding: 1.5rem;
+    background-color: var(--secondary-bg-color);
+    border-radius: 0.375rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); /* Subtle shadow */
+    margin-bottom: 2rem;
+}
+
+/* Responsive typography for smaller screens (optional) */
+@media (max-width: 768px) {
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.375rem; }
+}
+
+/* Ensure fixed navbar doesn't overlap content - already handled by body padding-top */
+/* Body padding-top should be adjusted if navbar height changes significantly */
+/* Example:
+   .navbar { min-height: 3.5rem; }
+   body { padding-top: 3.5rem; }
+*/
+
+/* Custom Navbar Style */
+.navbar-custom {
+    background-color: var(--secondary-bg-color); /* White background */
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); /* Subtle shadow */
+}
+
+.navbar-custom .navbar-brand {
+    color: var(--primary-text-color);
+    font-weight: 600; /* Bolder brand */
+}
+.navbar-custom .navbar-brand:hover,
+.navbar-custom .navbar-brand:focus {
+    color: var(--accent-color);
+}
+
+.navbar-custom .nav-link {
+    color: var(--secondary-text-color);
+    font-weight: 500;
+}
+
+.navbar-custom .nav-link:hover,
+.navbar-custom .nav-link:focus {
+    color: var(--accent-color);
+}
+
+.navbar-custom .nav-link.active {
+    color: var(--accent-color);
+    font-weight: 600;
+    border-bottom: 2px solid var(--accent-color); /* Subtle active indicator */
+    padding-bottom: calc(0.5rem - 2px); /* Adjust padding to account for border */
+}
+
+/* Make dropdown menu also light */
+.navbar-custom .dropdown-menu {
+    background-color: var(--secondary-bg-color);
+    border-color: var(--border-color);
+}
+.navbar-custom .dropdown-item {
+    color: var(--primary-text-color);
+}
+.navbar-custom .dropdown-item:hover,
+.navbar-custom .dropdown-item:focus {
+    background-color: var(--primary-bg-color);
+    color: var(--accent-color);
+}
+.navbar-custom .dropdown-item.active,
+.navbar-custom .dropdown-item:active {
+     background-color: var(--accent-color);
+     color: var(--secondary-bg-color);
+}
+
+
+/* Main Content Area */
+.main-container {
+    padding-top: 1.5rem; /* Space below fixed navbar */
+    padding-bottom: 1.5rem;
+}
+
+/* Footer Styling */
+.footer {
+    background-color: var(--primary-bg-color); /* Light grey, same as body for subtle effect */
+    color: var(--secondary-text-color);
+    padding: 1.5rem 0;
+    text-align: center;
+    font-size: 0.875rem; /* Smaller text */
+    border-top: 1px solid var(--border-color);
+    margin-top: 3rem; /* Space above footer */
+}
+
+/* Alert Styling Refinements (examples) */
+.alert {
+    border-radius: 0.25rem; /* Softer corners */
+    border-left-width: 0.25rem; /* Accent border on the left */
+    padding: 1rem;
+}
+.alert-success {
+    border-left-color: var(--bs-success); /* Using Bootstrap's success color variable */
+    background-color: var(--bs-success-bg-subtle);
+    color: var(--bs-success-text);
+}
+.alert-danger {
+    border-left-color: var(--bs-danger);
+    background-color: var(--bs-danger-bg-subtle);
+    color: var(--bs-danger-text);
+}
+.alert-warning {
+    border-left-color: var(--bs-warning);
+    background-color: var(--bs-warning-bg-subtle);
+    color: var(--bs-warning-text);
+}
+.alert-info {
+    border-left-color: var(--bs-info);
+    background-color: var(--bs-info-bg-subtle);
+    color: var(--bs-info-text);
+}
+
+/* Table styling - ensure padding and alignment */
+.table th, .table td {
+    padding: 0.75rem; /* Default Bootstrap is 0.5rem, increasing slightly */
+    vertical-align: middle;
+}
+.table thead th {
+    color: var(--primary-text-color);
+    font-weight: 600; /* Bolder table headers */
+    background-color: var(--primary-bg-color); /* Light grey background for table headers */
+    border-bottom-width: 2px; /* More distinct header border */
+    border-color: var(--border-color);
+}

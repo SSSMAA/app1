@@ -58,7 +58,7 @@
     </p>
     <p class="form-text text-muted">Uploading a new file will replace the current one.</p>
 
-    <button type="submit" class="btn btn-success">Save Changes</button>
+    <button type="submit" class="btn btn-primary">Save Changes</button> {# Changed from btn-success #}
     <a href="{% url 'list_teacher_materials' class_id=class_instance.id %}" class="btn btn-secondary">Cancel</a>
 </form>
 {% endblock %}

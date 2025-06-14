@@ -3,24 +3,29 @@
 {% block title %}Message: {{ message_obj.subject }}{% endblock %}
 
 {% block content %}
-<h2>{{ message_obj.subject }}</h2>
-<div class="card">
-    <div class="card-header">
-        <div class="d-flex justify-content-between">
-            <div>
-                <strong>From:</strong> {{ message_obj.sender.get_full_name|default:message_obj.sender.username }}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title mb-0">{{ message_obj.subject }}</h2>
+        </div>
+        <div class="card-body">
+            <div class="message-meta mb-3 pb-3 border-bottom">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <strong>From:</strong> {{ message_obj.sender.get_full_name|default:message_obj.sender.username }} ({{ message_obj.sender.email }})
                 <br>
-                <strong>To:</strong> {{ message_obj.recipient.get_full_name|default:message_obj.recipient.username }}
+                        <strong>To:</strong> {{ message_obj.recipient.get_full_name|default:message_obj.recipient.username }} ({{ message_obj.recipient.email }})
+                    </div>
+                    <div>
+                        <strong>Sent:</strong> {{ message_obj.timestamp|date:"Y-m-d H:i:s" }}
+                    </div>
+                </div>
             </div>
-            <div>
-                <strong>Sent:</strong> {{ message_obj.timestamp|date:"Y-m-d H:i:s" }}
+            <div class="message-body">
+                <p>{{ message_obj.body|linebreaksbr }}</p>
             </div>
         </div>
-    </div>
-    <div class="card-body">
-        <p>{{ message_obj.body|linebreaksbr }}</p>
-    </div>
-    <div class="card-footer text-muted">
+        <div class="card-footer text-muted">
         {# Reply Button - only if not viewing own sent message and not deleted by current user #}
         {% if not is_current_user_sender and not message_obj.recipient_deleted %}
              <a href="{% url 'compose_message' %}?reply_to={{ message_obj.id }}" class="btn btn-primary">Reply</a>

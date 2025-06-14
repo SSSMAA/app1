@@ -1,15 +1,60 @@
-<h2>My Profile</h2>
-<p><strong>Username:</strong> {{ profile.username }}</p>
-<p><strong>Email:</strong> {{ profile.email }}</p>
-<p><strong>First Name:</strong> {{ profile.first_name }}</p>
-<p><strong>Last Name:</strong> {{ profile.last_name }}</p>
-<p><strong>Contact Number:</strong> {{ profile.contact_number|default:"Not set" }}</p>
-{# Placeholder for subjects - will be added later #}
-{# <p><strong>Subjects Taught:</strong> ... </p> #}
-{% if profile.profile_picture %}
-    <p><strong>Profile Picture:</strong></p>
-    <img src="{{ profile.profile_picture.url }}" alt="{{ profile.username }}'s profile picture" style="max-width: 150px; max-height: 150px;">
-{% else %}
-    <p><strong>Profile Picture:</strong> Not set</p>
-{% endif %}
-<a href="{% url 'teacher_profile_edit' %}">Edit Profile</a>
+{% extends "users/base.html" %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title mb-0">My Profile</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    {% if profile.profile_picture %}
+                        <img src="{{ profile.profile_picture.url }}" alt="{{ profile.username }}'s profile picture" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 150px; height: 150px;">
+                            <span class="text-white fs-1">{{ profile.username|slice:":1"|upper }}</span>
+                        </div>
+                    {% endif %}
+                    <a href="{% url 'teacher_profile_edit' %}" class="btn btn-primary btn-sm">Edit Profile</a>
+                </div>
+                <div class="col-md-8">
+                    <dl class="row">
+                        <dt class="col-sm-4">Username:</dt>
+                        <dd class="col-sm-8">{{ profile.username }}</dd>
+
+                        <dt class="col-sm-4">Email:</dt>
+                        <dd class="col-sm-8">{{ profile.email }}</dd>
+
+                        <dt class="col-sm-4">First Name:</dt>
+                        <dd class="col-sm-8">{{ profile.first_name|default:"N/A" }}</dd>
+
+                        <dt class="col-sm-4">Last Name:</dt>
+                        <dd class="col-sm-8">{{ profile.last_name|default:"N/A" }}</dd>
+
+                        <dt class="col-sm-4">Contact Number:</dt>
+                        <dd class="col-sm-8">{{ profile.contact_number|default:"N/A" }}</dd>
+
+                        <dt class="col-sm-4">Role:</dt>
+                        <dd class="col-sm-8">{{ profile.get_role_display }}</dd>
+
+                        {# Placeholder for subjects - will be added later when models are linked #}
+                        {#
+                        <dt class="col-sm-4">Subjects Taught:</dt>
+                        <dd class="col-sm-8">
+                            {% for class_taught in user.taught_classes.all %}
+                                {{ class_taught.subject.name }} ({{ class_taught.name }}){% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                                N/A
+                            {% endfor %}
+                        </dd>
+                        #}
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

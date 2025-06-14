@@ -48,7 +48,7 @@
             {{ form.non_field_errors.as_ul }}
         </div>
     {% endif %}
-    <button type="submit" class="btn btn-success">Upload Material</button>
+    <button type="submit" class="btn btn-primary">Upload Material</button> {# Changed from btn-success #}
     <a href="{% url 'list_teacher_materials' class_id=class_instance.id %}" class="btn btn-secondary">Cancel</a>
 </form>
 {% endblock %}

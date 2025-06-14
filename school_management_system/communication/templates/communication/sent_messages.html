@@ -3,9 +3,10 @@
 {% block title %}{{ page_title|default:"Messages" }}{% endblock %}
 
 {% block content %}
-<h2>{{ page_title|default:"Messages" }}</h2>
-<a href="{% url 'compose_message' %}" class="btn btn-primary mb-3">Compose New Message</a>
-<a href="{% url 'inbox' %}" class="btn btn-outline-secondary mb-3 ms-2">View Inbox</a>
+<div class="container mt-4">
+    <h2 class="mb-4">{{ page_title|default:"Messages" }}</h2>
+    <a href="{% url 'compose_message' %}" class="btn btn-primary mb-3">Compose New Message</a>
+    <a href="{% url 'inbox' %}" class="btn btn-outline-secondary mb-3 ms-2">View Inbox</a>
 
 {% if messages_list %}
     <div class="list-group">
@@ -25,5 +26,5 @@
 {% else %}
     <p>No messages in your {{ page_title|lower }}.</p>
 {% endif %}
-
+</div>
 {% endblock %}

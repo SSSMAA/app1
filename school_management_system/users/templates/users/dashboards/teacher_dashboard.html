@@ -4,33 +4,63 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Teacher Dashboard</h2>
-    <p>Welcome, {{ user.get_full_name|default:user.username }}!</p>
-    <hr>
+    <h2 class="mb-4">Teacher Dashboard</h2>
+    <p class="lead mb-4">Welcome, {{ user.get_full_name|default:user.username }}!</p>
 
-    <h4>Key Actions & Links:</h4>
-    <div class="list-group">
-        <a href="{% url 'teacher_profile' %}" class="list-group-item list-group-item-action">My Profile</a>
-        {# Assuming a view exists for viewing own schedule based on assigned classes #}
-        {# <a href="{% url 'view_my_schedule' %}" class="list-group-item list-group-item-action">View My Schedule</a> #}
-        <a href="{% url 'select_class_date_attendance' %}" class="list-group-item list-group-item-action">Mark/Update Attendance</a>
-        <a href="{% url 'select_class_assessment_grading' %}" class="list-group-item list-group-item-action">Record/Update Grades</a>
-        <a href="{% url 'select_class_for_materials' %}" class="list-group-item list-group-item-action">Manage Lesson Materials</a>
-        <a href="{% url 'inbox' %}" class="list-group-item list-group-item-action">View Messages</a>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Classroom Management</h4>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{% url 'select_class_date_attendance' %}" class="list-group-item list-group-item-action">Mark/Update Attendance</a>
+                        <a href="{% url 'select_class_assessment_grading' %}" class="list-group-item list-group-item-action">Record/Update Grades</a>
+                        <a href="{% url 'select_class_for_materials' %}" class="list-group-item list-group-item-action">Manage Lesson Materials</a>
+                        {# <a href="{% url 'view_my_schedule' %}" class="list-group-item list-group-item-action">View My Schedule</a> #}
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">My Profile & Communication</h4>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{% url 'teacher_profile' %}" class="list-group-item list-group-item-action">View/Edit My Profile</a>
+                        <a href="{% url 'inbox' %}" class="list-group-item list-group-item-action">My Messages</a>
+                        <a href="{% url 'compose_message' %}" class="list-group-item list-group-item-action">Compose New Message</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">My Classes (Placeholder)</h4>
+                </div>
+                <div class="card-body">
+                    {# This section would list classes taught by the teacher #}
+                    <ul class="list-unstyled">
+                        <li>Class 1: [Subject] - [No. of Students] <span class="text-muted">(Link to class details/roster)</span></li>
+                        <li>Class 2: [Subject] - [No. of Students]</li>
+                        {# To be implemented with actual data later #}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Upcoming Deadlines/Events (Placeholder)</h4>
+        </div>
+        <div class="card-body">
+            <ul class="list-unstyled">
+                <li>Assignment X due for Class Y on [Date]</li>
+                {# To be implemented #}
+            </ul>
+        </div>
     </div>
-
-    <h4 class="mt-4">My Classes (Placeholder):</h4>
-    {# This section would list classes taught by the teacher #}
-    <ul>
-        <li>Class 1: [Subject] - [No. of Students] (Link to class details/roster)</li>
-        <li>Class 2: [Subject] - [No. of Students]</li>
-        {# To be implemented with actual data later #}
-    </ul>
-
-    <h4 class="mt-4">Upcoming Deadlines/Events (Placeholder):</h4>
-    <ul>
-        <li>Assignment X due for Class Y on [Date]</li>
-        {# To be implemented #}
-    </ul>
 </div>
 {% endblock %}

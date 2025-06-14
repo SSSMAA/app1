@@ -3,9 +3,10 @@
 {% block title %}{{ page_title|default:"Messages" }}{% endblock %}
 
 {% block content %}
-<h2>{{ page_title|default:"Messages" }}</h2>
-<a href="{% url 'compose_message' %}" class="btn btn-primary mb-3">Compose New Message</a>
-{% if is_inbox %}
+<div class="container mt-4">
+    <h2 class="mb-4">{{ page_title|default:"Messages" }}</h2>
+    <a href="{% url 'compose_message' %}" class="btn btn-primary mb-3">Compose New Message</a>
+    {% if is_inbox %}
     <a href="{% url 'sent_messages' %}" class="btn btn-outline-secondary mb-3 ms-2">View Sent Messages</a>
     <p>You have {{ unread_count }} unread message{{ unread_count|pluralize }}.</p>
 {% else %}
@@ -35,5 +36,5 @@
 {% else %}
     <p>No messages in your {{ page_title|lower }}.</p>
 {% endif %}
-
+</div>
 {% endblock %}

@@ -1,0 +1,10 @@
+# General
+node_modules/
+*.env
+
+# Frontend build output
+frontend/dist
+
+# IDE specific
+.vscode/
+.idea/

@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ischoolgo-webapp",
+  "main": "src/index.tsx",
+  "compatibility_date": "2025-08-21",
+  "compatibility_flags": ["nodejs_compat"],
+  "pages_build_output_dir": "./dist",
+
+  // D1 Database pour les données relationnelles
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ischoolgo-production",
+      "database_id": "TO_BE_FILLED_AFTER_CREATION"
+    }
+  ]
+}

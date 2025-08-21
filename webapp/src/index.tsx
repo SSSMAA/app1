@@ -1563,10 +1563,198 @@ app.get('/agent', (c) => {
             </div>
         </div>
 
-        <!-- Modals would go here -->
         <!-- Add Visitor Modal -->
         <div id="addVisitorModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-            <!-- Modal content would be implemented here -->
+            <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-900">إضافة زائر جديد</h3>
+                        <button onclick="hideAddVisitorModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form id="addVisitorForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">اسم الطالب</label>
+                                <input type="text" name="student_name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">اسم ولي الأمر</label>
+                                <input type="text" name="parent_name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
+                                <input type="tel" name="phone" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">العمر</label>
+                                <input type="number" name="age" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">المصدر</label>
+                                <select name="source" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">اختر المصدر</option>
+                                    <option value="facebook">Facebook</option>
+                                    <option value="instagram">Instagram</option>
+                                    <option value="google">Google</option>
+                                    <option value="referral">إحالة</option>
+                                    <option value="other">أخرى</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ الحصة التجريبية</label>
+                                <input type="datetime-local" name="trial_date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
+                            <textarea name="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-2">
+                            <button type="button" onclick="hideAddVisitorModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">إلغاء</button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">إضافة الزائر</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Student Modal -->
+        <div id="addStudentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+            <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-900">تسجيل طالب جديد</h3>
+                        <button onclick="hideAddStudentModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form id="addStudentForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">اسم الطالب</label>
+                                <input type="text" name="student_name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">اسم ولي الأمر</label>
+                                <input type="text" name="parent_name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
+                                <input type="tel" name="phone" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">العمر</label>
+                                <input type="number" name="age" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">المستوى</label>
+                                <select name="level" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                    <option value="">اختر المستوى</option>
+                                    <option value="مبتدئ">مبتدئ</option>
+                                    <option value="متوسط">متوسط</option>
+                                    <option value="متقدم">متقدم</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">الرسوم الشهرية</label>
+                                <input type="number" name="monthly_fee" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ البدء</label>
+                                <input type="date" name="start_date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">المجموعة</label>
+                                <select name="group_id" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                    <option value="">اختر المجموعة</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
+                            <textarea name="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-2">
+                            <button type="button" onclick="hideAddStudentModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">إلغاء</button>
+                            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">تسجيل الطالب</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Payment Modal -->
+        <div id="addPaymentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+            <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-900">تسجيل دفعة جديدة</h3>
+                        <button onclick="hideAddPaymentModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form id="addPaymentForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">الطالب</label>
+                                <select name="student_id" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="">اختر الطالب</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">المبلغ</label>
+                                <input type="number" name="amount" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">الشهر المدفوع</label>
+                                <select name="month_paid" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="">اختر الشهر</option>
+                                    <option value="يناير 2024">يناير 2024</option>
+                                    <option value="فبراير 2024">فبراير 2024</option>
+                                    <option value="مارس 2024">مارس 2024</option>
+                                    <option value="أبريل 2024">أبريل 2024</option>
+                                    <option value="مايو 2024">مايو 2024</option>
+                                    <option value="يونيو 2024">يونيو 2024</option>
+                                    <option value="يوليو 2024">يوليو 2024</option>
+                                    <option value="أغسطس 2024">أغسطس 2024</option>
+                                    <option value="سبتمبر 2024">سبتمبر 2024</option>
+                                    <option value="أكتوبر 2024">أكتوبر 2024</option>
+                                    <option value="نوفمبر 2024">نوفمبر 2024</option>
+                                    <option value="ديسمبر 2024">ديسمبر 2024</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">طريقة الدفع</label>
+                                <select name="payment_method" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="">اختر طريقة الدفع</option>
+                                    <option value="نقد">نقد</option>
+                                    <option value="بنك">تحويل بنكي</option>
+                                    <option value="شيك">شيك</option>
+                                    <option value="أونلاين">دفع إلكتروني</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ الدفع</label>
+                                <input type="date" name="payment_date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">رقم الإيصال</label>
+                                <input type="text" name="receipt_number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
+                            <textarea name="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-2">
+                            <button type="button" onclick="hideAddPaymentModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">إلغاء</button>
+                            <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">تسجيل الدفعة</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
@@ -1848,18 +2036,120 @@ app.get('/agent', (c) => {
                 }
             }
 
-            // Modal functions (placeholders)
+            // Modal functions
             function showAddVisitorModal() {
-                alert('سيتم تنفيذ نموذج إضافة زائر جديد');
+                document.getElementById('addVisitorModal').classList.remove('hidden');
+            }
+
+            function hideAddVisitorModal() {
+                document.getElementById('addVisitorModal').classList.add('hidden');
+                document.getElementById('addVisitorForm').reset();
             }
 
             function showAddStudentModal() {
-                alert('سيتم تنفيذ نموذج تسجيل طالب جديد');
+                document.getElementById('addStudentModal').classList.remove('hidden');
+                loadGroupsForStudent();
+            }
+
+            function hideAddStudentModal() {
+                document.getElementById('addStudentModal').classList.add('hidden');
+                document.getElementById('addStudentForm').reset();
             }
 
             function showAddPaymentModal() {
-                alert('سيتم تنفيذ نموذج تسجيل دفعة جديدة');
+                document.getElementById('addPaymentModal').classList.remove('hidden');
+                loadStudentsForPayment();
             }
+
+            function hideAddPaymentModal() {
+                document.getElementById('addPaymentModal').classList.add('hidden');
+                document.getElementById('addPaymentForm').reset();
+            }
+
+            // Load data for form dropdowns
+            async function loadGroupsForStudent() {
+                try {
+                    const response = await axios.get('/api/groups?active=true');
+                    const select = document.querySelector('#addStudentModal select[name="group_id"]');
+                    select.innerHTML = '<option value="">اختر المجموعة</option>';
+                    response.data.groups.forEach(group => {
+                        select.innerHTML += \`<option value="\${group.id}">\${group.name} - \${group.level}</option>\`;
+                    });
+                } catch (error) {
+                    console.error('Error loading groups:', error);
+                }
+            }
+
+            async function loadStudentsForPayment() {
+                try {
+                    const response = await axios.get('/api/students');
+                    const select = document.querySelector('#addPaymentModal select[name="student_id"]');
+                    select.innerHTML = '<option value="">اختر الطالب</option>';
+                    response.data.students.forEach(student => {
+                        select.innerHTML += \`<option value="\${student.id}">\${student.student_name} - \${student.parent_name}</option>\`;
+                    });
+                } catch (error) {
+                    console.error('Error loading students:', error);
+                }
+            }
+
+            // Form submission handlers
+            document.getElementById('addVisitorForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+                
+                try {
+                    await axios.post('/api/visitors', data);
+                    hideAddVisitorModal();
+                    showTab('visitors'); // Reload visitors table
+                    alert('تم إضافة الزائر بنجاح');
+                } catch (error) {
+                    console.error('Error adding visitor:', error);
+                    alert('حدث خطأ في إضافة الزائر');
+                }
+            });
+
+            document.getElementById('addStudentForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+                
+                try {
+                    await axios.post('/api/students', data);
+                    hideAddStudentModal();
+                    showTab('students'); // Reload students table
+                    alert('تم تسجيل الطالب بنجاح');
+                } catch (error) {
+                    console.error('Error adding student:', error);
+                    alert('حدث خطأ في تسجيل الطالب');
+                }
+            });
+
+            document.getElementById('addPaymentForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+                
+                try {
+                    await axios.post('/api/payments', data);
+                    hideAddPaymentModal();
+                    showTab('payments'); // Reload payments table
+                    alert('تم تسجيل الدفعة بنجاح');
+                } catch (error) {
+                    console.error('Error adding payment:', error);
+                    alert('حدث خطأ في تسجيل الدفعة');
+                }
+            });
+
+            // Close modals when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
+                    if (e.target.id === 'addVisitorModal') hideAddVisitorModal();
+                    if (e.target.id === 'addStudentModal') hideAddStudentModal();
+                    if (e.target.id === 'addPaymentModal') hideAddPaymentModal();
+                }
+            });
 
             // Initialize the page
             showTab('visitors');

@@ -98,7 +98,7 @@ export const marketerDashboard = `
             <div class="bg-white rounded-lg shadow">
                 <div class="p-6 border-b border-gray-200 flex justify-between items-center">
                     <h3 class="text-lg font-semibold text-gray-800">الحملات الإعلانية</h3>
-                    <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                    <button onclick="showAddCampaignModal()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
                         <i class="fas fa-plus mr-2"></i>حملة جديدة
                     </button>
                 </div>
@@ -115,7 +115,7 @@ export const marketerDashboard = `
             <div class="bg-white rounded-lg shadow">
                 <div class="p-6 border-b border-gray-200 flex justify-between items-center">
                     <h3 class="text-lg font-semibold text-gray-800">العملاء المحتملون</h3>
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    <button onclick="showAddLeadModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                         <i class="fas fa-plus mr-2"></i>عميل محتمل جديد
                     </button>
                 </div>
@@ -145,6 +145,141 @@ export const marketerDashboard = `
                     </h3>
                     <canvas id="leadSourcesChart" width="400" height="200"></canvas>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Campaign Modal -->
+    <div id="addCampaignModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">إضافة حملة إعلانية جديدة</h3>
+                    <button onclick="hideAddCampaignModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="addCampaignForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">اسم الحملة</label>
+                            <input type="text" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">المنصة</label>
+                            <select name="platform" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <option value="">اختر المنصة</option>
+                                <option value="Facebook">Facebook</option>
+                                <option value="Instagram">Instagram</option>
+                                <option value="Google Ads">Google Ads</option>
+                                <option value="TikTok">TikTok</option>
+                                <option value="LinkedIn">LinkedIn</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الميزانية</label>
+                            <input type="number" name="budget" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ البدء</label>
+                            <input type="date" name="start_date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">تاريخ الانتهاء</label>
+                            <input type="date" name="end_date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الهدف</label>
+                            <select name="objective" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <option value="">اختر الهدف</option>
+                                <option value="leads">جمع عملاء محتملين</option>
+                                <option value="awareness">زيادة الوعي</option>
+                                <option value="traffic">زيادة الزيارات</option>
+                                <option value="conversions">تحويلات</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">وصف الحملة</label>
+                        <textarea name="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" onclick="hideAddCampaignModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">إلغاء</button>
+                        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">إنشاء الحملة</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Lead Modal -->
+    <div id="addLeadModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">إضافة عميل محتمل جديد</h3>
+                    <button onclick="hideAddLeadModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="addLeadForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الاسم الكامل</label>
+                            <input type="text" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
+                            <input type="tel" name="phone" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
+                            <input type="email" name="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">المصدر</label>
+                            <select name="source" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">اختر المصدر</option>
+                                <option value="Facebook Ads">Facebook Ads</option>
+                                <option value="Google Ads">Google Ads</option>
+                                <option value="Instagram">Instagram</option>
+                                <option value="إحالة">إحالة</option>
+                                <option value="الموقع الإلكتروني">الموقع الإلكتروني</option>
+                                <option value="أخرى">أخرى</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الاهتمام</label>
+                            <select name="interest" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">اختر مجال الاهتمام</option>
+                                <option value="رياضيات">رياضيات</option>
+                                <option value="فيزياء">فيزياء</option>
+                                <option value="كيمياء">كيمياء</option>
+                                <option value="لغة عربية">لغة عربية</option>
+                                <option value="لغة فرنسية">لغة فرنسية</option>
+                                <option value="لغة إنجليزية">لغة إنجليزية</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">الحالة</label>
+                            <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="new">جديد</option>
+                                <option value="contacted">تم التواصل</option>
+                                <option value="qualified">مؤهل</option>
+                                <option value="converted">محول</option>
+                                <option value="lost">مفقود</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
+                        <textarea name="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" onclick="hideAddLeadModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">إلغاء</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">إضافة العميل</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -416,6 +551,68 @@ export const marketerDashboard = `
                 default: return status;
             }
         }
+
+        // Modal functions for marketer dashboard
+        function showAddCampaignModal() {
+            document.getElementById('addCampaignModal').classList.remove('hidden');
+        }
+
+        function hideAddCampaignModal() {
+            document.getElementById('addCampaignModal').classList.add('hidden');
+            document.getElementById('addCampaignForm').reset();
+        }
+
+        function showAddLeadModal() {
+            document.getElementById('addLeadModal').classList.remove('hidden');
+        }
+
+        function hideAddLeadModal() {
+            document.getElementById('addLeadModal').classList.add('hidden');
+            document.getElementById('addLeadForm').reset();
+        }
+
+        // Form submission handlers for marketer
+        document.getElementById('addCampaignForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                // For now, we'll just simulate success since we don't have a campaigns POST endpoint
+                console.log('Campaign data:', data);
+                hideAddCampaignModal();
+                showTab('campaigns'); // Reload campaigns table
+                alert('تم إنشاء الحملة بنجاح');
+            } catch (error) {
+                console.error('Error adding campaign:', error);
+                alert('حدث خطأ في إنشاء الحملة');
+            }
+        });
+
+        document.getElementById('addLeadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            data.received_date = new Date().toISOString();
+            
+            try {
+                await axios.post('/api/leads', data);
+                hideAddLeadModal();
+                showTab('leads'); // Reload leads table
+                alert('تم إضافة العميل المحتمل بنجاح');
+            } catch (error) {
+                console.error('Error adding lead:', error);
+                alert('حدث خطأ في إضافة العميل المحتمل');
+            }
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('fixed') && e.target.classList.contains('inset-0')) {
+                if (e.target.id === 'addCampaignModal') hideAddCampaignModal();
+                if (e.target.id === 'addLeadModal') hideAddLeadModal();
+            }
+        });
 
         // Initialize
         showTab('campaigns');

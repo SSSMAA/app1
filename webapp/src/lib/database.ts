@@ -1,6 +1,35 @@
 // Database utility functions for ISCHOOLGO
 import type { Bindings, DashboardStats, Student, User, Group, Payment, Visitor, Lead, Campaign } from '../types';
 
+// Simple crypto functions for password hashing (for demo purposes)
+class SimpleCrypto {
+  static async hash(password: string): Promise<string> {
+    try {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password + 'ischoolgo-salt-2024');
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (error) {
+      console.error('Hash error:', error);
+      // Fallback simple hash for demo
+      return btoa(password + 'ischoolgo-salt-2024').replace(/[^a-zA-Z0-9]/g, '');
+    }
+  }
+
+  static async verify(password: string, hash: string): Promise<boolean> {
+    try {
+      const hashedPassword = await this.hash(password);
+      return hashedPassword === hash;
+    } catch (error) {
+      console.error('Verify error:', error);
+      return false;
+    }
+  }
+}
+
+export { SimpleCrypto };
+
 export class DatabaseService {
   constructor(private db: D1Database) {}
 
@@ -221,6 +250,105 @@ export class DatabaseService {
   async getCampaigns(): Promise<Campaign[]> {
     const result = await this.db.prepare("SELECT * FROM campaigns ORDER BY start_date DESC").all();
     return result.results as Campaign[];
+  }
+
+  // Authentication functions
+  async authenticateUser(username: string, password: string): Promise<User | null> {
+    // Try to find user by username, email, or ID
+    // Handle common username patterns: admin -> admin-001, teacher -> teacher-001, etc.
+    let searchTerms = [username, username.toLowerCase()];
+    
+    // If username doesn't contain a dash, try adding -001
+    if (!username.includes('-')) {
+      searchTerms.push(`${username}-001`);
+    }
+    
+    // Also try email format
+    searchTerms.push(`${username}@ischoolgo.com`);
+    
+    console.log('Searching for user with terms:', searchTerms);
+    
+    let result = null;
+    for (const term of searchTerms) {
+      result = await this.db.prepare(`
+        SELECT * FROM users 
+        WHERE (id = ? OR email = ? OR LOWER(REPLACE(full_name, ' ', '')) = LOWER(REPLACE(?, ' ', '')))
+        AND status = 'active'
+      `).bind(term, term, term).first();
+      
+      if (result) {
+        console.log('Found user:', result);
+        break;
+      }
+    }
+    
+    if (!result) {
+      console.log('No user found for search terms');
+      return null;
+    }
+    
+    const user = result as User;
+    console.log('Authenticating user:', user.id, 'with role:', user.role);
+    
+    // For demo purposes, check if password_hash is null and use default passwords
+    if (!user.password_hash || user.password_hash === 'null') {
+      console.log('User has no password hash, using default passwords');
+      // Default passwords based on role
+      const defaultPasswords: Record<string, string> = {
+        'admin': 'admin123',
+        'director': 'director123', 
+        'marketer': 'marketer123',
+        'head_trainer': 'trainer123',
+        'agent': 'agent123',
+        'teacher': 'teacher123'
+      };
+      
+      const expectedPassword = defaultPasswords[user.role];
+      console.log('Expected password for role', user.role, ':', expectedPassword);
+      
+      if (password === expectedPassword) {
+        console.log('Password matches, updating hash');
+        try {
+          // Update the user with hashed password for future use
+          const hashedPassword = await SimpleCrypto.hash(password);
+          await this.db.prepare(`
+            UPDATE users SET password_hash = ? WHERE id = ?
+          `).bind(hashedPassword, user.id).run();
+          console.log('Password hash updated successfully');
+        } catch (hashError) {
+          console.error('Error updating password hash:', hashError);
+          // Still return user even if hash update fails
+        }
+        
+        return user;
+      } else {
+        console.log('Password does not match. Expected:', expectedPassword, 'Got:', password);
+      }
+      return null;
+    }
+    
+    // Verify hashed password
+    console.log('Verifying hashed password');
+    try {
+      const isValid = await SimpleCrypto.verify(password, user.password_hash);
+      console.log('Password verification result:', isValid);
+      return isValid ? user : null;
+    } catch (error) {
+      console.error('Password verification error:', error);
+      return null;
+    }
+  }
+
+  async getUserById(id: string): Promise<User | null> {
+    const result = await this.db.prepare("SELECT * FROM users WHERE id = ?").bind(id).first();
+    return result as User | null;
+  }
+
+  async updateUserPassword(id: string, newPassword: string): Promise<void> {
+    const hashedPassword = await SimpleCrypto.hash(newPassword);
+    await this.db.prepare(`
+      UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+    `).bind(hashedPassword, id).run();
   }
 
   // Utility functions

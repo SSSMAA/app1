@@ -3,6 +3,7 @@ import { cors } from 'hono/cors'
 import { serveStatic } from 'hono/cloudflare-workers'
 import type { HonoContext, Bindings } from './types'
 import { DatabaseService } from './lib/database'
+import { JWTService } from './lib/jwt'
 import { marketerDashboard } from './routes/marketer'
 
 const app = new Hono<HonoContext>()
@@ -13,10 +14,98 @@ app.use('/api/*', cors())
 // Serve static files
 app.use('/static/*', serveStatic({ root: './public' }))
 
-// API Routes
+// Authentication middleware
+const authMiddleware = async (c: any, next: any) => {
+  const authHeader = c.req.header('Authorization');
+  const token = JWTService.extractTokenFromRequest(authHeader);
+  
+  if (!token) {
+    return c.json({ error: 'Authentication required' }, 401);
+  }
+  
+  const payload = await JWTService.verify(token);
+  if (!payload) {
+    return c.json({ error: 'Invalid or expired token' }, 401);
+  }
+  
+  // Add user info to context
+  c.set('user', payload);
+  await next();
+};
+
+// Authentication Routes
+app.post('/api/auth/login', async (c) => {
+  try {
+    const { username, password } = await c.req.json();
+    
+    if (!username || !password) {
+      return c.json({ error: 'Username and password are required' }, 400);
+    }
+    
+    const db = new DatabaseService(c.env.DB);
+    const user = await db.authenticateUser(username, password);
+    
+    if (!user) {
+      return c.json({ error: 'Invalid credentials' }, 401);
+    }
+    
+    // Generate JWT token
+    const token = await JWTService.sign({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      fullName: user.full_name
+    });
+    
+    return c.json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.full_name,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    return c.json({ error: 'Login failed' }, 500);
+  }
+});
+
+app.post('/api/auth/verify', async (c) => {
+  try {
+    const authHeader = c.req.header('Authorization');
+    const token = JWTService.extractTokenFromRequest(authHeader);
+    
+    if (!token) {
+      return c.json({ valid: false }, 401);
+    }
+    
+    const payload = await JWTService.verify(token);
+    if (!payload) {
+      return c.json({ valid: false }, 401);
+    }
+    
+    return c.json({
+      valid: true,
+      user: {
+        id: payload.userId,
+        email: payload.email,
+        fullName: payload.fullName,
+        role: payload.role
+      }
+    });
+  } catch (error) {
+    console.error('Token verification error:', error);
+    return c.json({ valid: false }, 500);
+  }
+});
+
+// API Routes (Protected)
 
 // Dashboard API
-app.get('/api/dashboard/stats', async (c) => {
+app.get('/api/dashboard/stats', authMiddleware, async (c) => {
   try {
     const db = new DatabaseService(c.env.DB)
     const stats = await db.getDashboardStats()
@@ -28,7 +117,7 @@ app.get('/api/dashboard/stats', async (c) => {
 })
 
 // Students API
-app.get('/api/students', async (c) => {
+app.get('/api/students', authMiddleware, async (c) => {
   try {
     const limit = parseInt(c.req.query('limit') || '50')
     const offset = parseInt(c.req.query('offset') || '0')
@@ -50,7 +139,7 @@ app.get('/api/students', async (c) => {
   }
 })
 
-app.get('/api/students/:id', async (c) => {
+app.get('/api/students/:id', authMiddleware, async (c) => {
   try {
     const id = c.req.param('id')
     const db = new DatabaseService(c.env.DB)
@@ -67,7 +156,7 @@ app.get('/api/students/:id', async (c) => {
   }
 })
 
-app.post('/api/students', async (c) => {
+app.post('/api/students', authMiddleware, async (c) => {
   try {
     const data = await c.req.json()
     const db = new DatabaseService(c.env.DB)
@@ -80,7 +169,7 @@ app.post('/api/students', async (c) => {
 })
 
 // Visitors API
-app.get('/api/visitors', async (c) => {
+app.get('/api/visitors', authMiddleware, async (c) => {
   try {
     const limit = parseInt(c.req.query('limit') || '50')
     const offset = parseInt(c.req.query('offset') || '0')
@@ -95,7 +184,7 @@ app.get('/api/visitors', async (c) => {
   }
 })
 
-app.post('/api/visitors', async (c) => {
+app.post('/api/visitors', authMiddleware, async (c) => {
   try {
     const data = await c.req.json()
     const db = new DatabaseService(c.env.DB)
@@ -108,7 +197,7 @@ app.post('/api/visitors', async (c) => {
 })
 
 // Payments API
-app.get('/api/payments', async (c) => {
+app.get('/api/payments', authMiddleware, async (c) => {
   try {
     const limit = parseInt(c.req.query('limit') || '50')
     const offset = parseInt(c.req.query('offset') || '0')
@@ -123,7 +212,7 @@ app.get('/api/payments', async (c) => {
   }
 })
 
-app.post('/api/payments', async (c) => {
+app.post('/api/payments', authMiddleware, async (c) => {
   try {
     const data = await c.req.json()
     const db = new DatabaseService(c.env.DB)
@@ -136,7 +225,7 @@ app.post('/api/payments', async (c) => {
 })
 
 // Groups API
-app.get('/api/groups', async (c) => {
+app.get('/api/groups', authMiddleware, async (c) => {
   try {
     const db = new DatabaseService(c.env.DB)
     const active = c.req.query('active')
@@ -156,7 +245,7 @@ app.get('/api/groups', async (c) => {
 })
 
 // Users API
-app.get('/api/users', async (c) => {
+app.get('/api/users', authMiddleware, async (c) => {
   try {
     const role = c.req.query('role')
     const db = new DatabaseService(c.env.DB)
@@ -176,7 +265,7 @@ app.get('/api/users', async (c) => {
 })
 
 // Leads API
-app.get('/api/leads', async (c) => {
+app.get('/api/leads', authMiddleware, async (c) => {
   try {
     const limit = parseInt(c.req.query('limit') || '50')
     const offset = parseInt(c.req.query('offset') || '0')
@@ -191,7 +280,7 @@ app.get('/api/leads', async (c) => {
   }
 })
 
-app.post('/api/leads', async (c) => {
+app.post('/api/leads', authMiddleware, async (c) => {
   try {
     const data = await c.req.json()
     const db = new DatabaseService(c.env.DB)
@@ -204,7 +293,7 @@ app.post('/api/leads', async (c) => {
 })
 
 // Campaigns API
-app.get('/api/campaigns', async (c) => {
+app.get('/api/campaigns', authMiddleware, async (c) => {
   try {
     const db = new DatabaseService(c.env.DB)
     const campaigns = await db.getCampaigns()
@@ -216,7 +305,7 @@ app.get('/api/campaigns', async (c) => {
   }
 })
 
-// Main Dashboard Route - Role Selection
+// Login Page Route
 app.get('/', (c) => {
   return c.html(`
     <!DOCTYPE html>
@@ -224,7 +313,195 @@ app.get('/', (c) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>ISCHOOLGO - نظام إدارة المدرسة</title>
+        <title>ISCHOOLGO - تسجيل الدخول</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+          .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        </style>
+    </head>
+    <body class="bg-gray-50 min-h-screen">
+        <div class="min-h-screen flex items-center justify-center">
+            <div class="max-w-md w-full mx-4">
+                <!-- Header -->
+                <div class="text-center mb-8">
+                    <div class="gradient-bg w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-graduation-cap text-white text-3xl"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">ISCHOOLGO</h1>
+                    <p class="text-gray-600">نظام إدارة المدرسة المتكامل</p>
+                </div>
+
+                <!-- Login Form -->
+                <div class="bg-white rounded-lg shadow-lg p-8">
+                    <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">تسجيل الدخول</h2>
+                    
+                    <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"></div>
+                    
+                    <form id="loginForm" class="space-y-6">
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                                اسم المستخدم
+                            </label>
+                            <input type="text" id="username" name="username" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="أدخل اسم المستخدم">
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                                كلمة المرور
+                            </label>
+                            <input type="password" id="password" name="password" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="أدخل كلمة المرور">
+                        </div>
+                        
+                        <button type="submit" id="loginBtn"
+                                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+                            <span id="loginText">تسجيل الدخول</span>
+                            <i id="loginSpinner" class="fas fa-spinner fa-spin hidden mr-2"></i>
+                        </button>
+                    </form>
+                    
+                    <!-- Demo Accounts -->
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">الحسابات التجريبية:</h3>
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <div class="flex justify-between">
+                                <span>👑 المدير العام:</span>
+                                <span class="font-mono">admin / admin123</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>📊 المدير التنفيذي:</span>
+                                <span class="font-mono">director / director123</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>🧑‍🏫 الأستاذ:</span>
+                                <span class="font-mono">teacher / teacher123</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>📢 مسؤول التسويق:</span>
+                                <span class="font-mono">marketer / marketer123</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>🎓 مسؤول التدريب:</span>
+                                <span class="font-mono">headtrainer / trainer123</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>🎧 وكيل العملاء:</span>
+                                <span class="font-mono">agent / agent123</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+        <script>
+            const loginForm = document.getElementById('loginForm');
+            const errorMessage = document.getElementById('error-message');
+            const loginBtn = document.getElementById('loginBtn');
+            const loginText = document.getElementById('loginText');
+            const loginSpinner = document.getElementById('loginSpinner');
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.classList.remove('hidden');
+            }
+
+            function hideError() {
+                errorMessage.classList.add('hidden');
+            }
+
+            function setLoading(loading) {
+                if (loading) {
+                    loginText.textContent = 'جاري التحقق...';
+                    loginSpinner.classList.remove('hidden');
+                    loginBtn.disabled = true;
+                } else {
+                    loginText.textContent = 'تسجيل الدخول';
+                    loginSpinner.classList.add('hidden');
+                    loginBtn.disabled = false;
+                }
+            }
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                hideError();
+                
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value;
+                
+                if (!username || !password) {
+                    showError('يرجى إدخال اسم المستخدم وكلمة المرور');
+                    return;
+                }
+                
+                setLoading(true);
+                
+                try {
+                    const response = await axios.post('/api/auth/login', {
+                        username,
+                        password
+                    });
+                    
+                    if (response.data.success) {
+                        // Store token in localStorage
+                        localStorage.setItem('ischoolgo_token', response.data.token);
+                        localStorage.setItem('ischoolgo_user', JSON.stringify(response.data.user));
+                        
+                        // Redirect to dashboard
+                        window.location.href = '/dashboard';
+                    } else {
+                        showError('فشل في تسجيل الدخول');
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    const message = error.response?.data?.error || 'خطأ في الاتصال';
+                    showError(message);
+                } finally {
+                    setLoading(false);
+                }
+            });
+            
+            // Check if user is already logged in
+            const token = localStorage.getItem('ischoolgo_token');
+            if (token) {
+                // Verify token and redirect if valid
+                axios.post('/api/auth/verify', {}, {
+                    headers: {
+                        'Authorization': \`Bearer \${token}\`
+                    }
+                }).then(response => {
+                    if (response.data.valid) {
+                        window.location.href = '/dashboard';
+                    } else {
+                        localStorage.removeItem('ischoolgo_token');
+                        localStorage.removeItem('ischoolgo_user');
+                    }
+                }).catch(() => {
+                    localStorage.removeItem('ischoolgo_token');
+                    localStorage.removeItem('ischoolgo_user');
+                });
+            }
+        </script>
+    </body>
+    </html>
+  `)
+})
+
+// Dashboard Route - Role Selection (Protected)
+app.get('/dashboard', (c) => {
+  return c.html(`
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>ISCHOOLGO - لوحة التحكم</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
         <style>
@@ -234,18 +511,36 @@ app.get('/', (c) => {
         </style>
     </head>
     <body class="bg-gray-50 min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-800">
+                        <i class="fas fa-graduation-cap text-blue-600 mr-2"></i>
+                        ISCHOOLGO
+                    </h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="userInfo" class="text-gray-600">جاري التحميل...</span>
+                    <button onclick="logout()" class="text-red-600 hover:text-red-800">
+                        <i class="fas fa-sign-out-alt mr-1"></i>
+                        تسجيل الخروج
+                    </button>
+                </div>
+            </div>
+        </header>
+        
         <div class="gradient-bg text-white py-12">
             <div class="max-w-6xl mx-auto px-4 text-center">
                 <h1 class="text-4xl font-bold mb-4">
-                    <i class="fas fa-graduation-cap mr-3"></i>
-                    ISCHOOLGO
+                    مرحباً بك في ISCHOOLGO
                 </h1>
-                <p class="text-xl opacity-90">نظام إدارة المدرسة المتكامل</p>
+                <p class="text-xl opacity-90">اختر القسم المناسب لدورك</p>
             </div>
         </div>
 
         <div class="max-w-6xl mx-auto px-4 -mt-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div id="roleCards" style="display: none;" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Admin -->
                 <div class="role-card bg-white rounded-xl shadow-lg p-6 text-center cursor-pointer" onclick="window.location.href='/admin'">
                     <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -340,13 +635,46 @@ app.get('/', (c) => {
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+        <script>
+            function logout() {
+                localStorage.removeItem('ischoolgo_token');
+                localStorage.removeItem('ischoolgo_user');
+                window.location.href = '/';
+            }
+
+            // Check authentication
+            const token = localStorage.getItem('ischoolgo_token');
+            const userStr = localStorage.getItem('ischoolgo_user');
+            
+            if (!token || !userStr) {
+                window.location.href = '/';
+            } else {
+                const user = JSON.parse(userStr);
+                document.getElementById('userInfo').textContent = \`مرحباً \${user.fullName}\`;
+                
+                // Verify token is still valid
+                axios.post('/api/auth/verify', {}, {
+                    headers: {
+                        'Authorization': \`Bearer \${token}\`
+                    }
+                }).then(response => {
+                    if (response.data.valid) {
+                        document.getElementById('roleCards').style.display = 'grid';
+                    } else {
+                        logout();
+                    }
+                }).catch(() => {
+                    logout();
+                });
+            }
+        </script>
     </body>
     </html>
   `)
 })
 
 // Admin Dashboard
-app.get('/admin', (c) => {
+app.get('/admin', async (c) => {
   return c.html(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
@@ -491,6 +819,28 @@ app.get('/admin', (c) => {
 
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script>
+            // Authentication check
+            const token = localStorage.getItem('ischoolgo_token');
+            if (!token) {
+                window.location.href = '/';
+            } else {
+                // Set authorization header for all axios requests
+                axios.defaults.headers.common['Authorization'] = \`Bearer \${token}\`;
+                
+                // Verify token
+                axios.post('/api/auth/verify').then(response => {
+                    if (!response.data.valid) {
+                        localStorage.removeItem('ischoolgo_token');
+                        localStorage.removeItem('ischoolgo_user');
+                        window.location.href = '/';
+                    }
+                }).catch(() => {
+                    localStorage.removeItem('ischoolgo_token');
+                    localStorage.removeItem('ischoolgo_user');
+                    window.location.href = '/';
+                });
+            }
+            
             // Set current date
             document.getElementById('currentDate').textContent = new Date().toLocaleDateString('ar-EG');
 

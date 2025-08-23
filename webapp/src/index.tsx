@@ -17,7 +17,14 @@ app.use('/static/*', serveStatic({ root: './public' }))
 // Authentication middleware
 const authMiddleware = async (c: any, next: any) => {
   const authHeader = c.req.header('Authorization');
-  const token = JWTService.extractTokenFromRequest(authHeader);
+  let token = JWTService.extractTokenFromRequest(authHeader);
+  if (!token) {
+    const cookieHeader = c.req.header('Cookie') || c.req.header('cookie');
+    if (cookieHeader) {
+      const match = cookieHeader.split(';').map((s: string) => s.trim()).find((s: string) => s.startsWith('ischoolgo_token='));
+      if (match) token = match.split('=')[1];
+    }
+  }
   
   if (!token) {
     return c.json({ error: 'Authentication required' }, 401);
@@ -31,6 +38,40 @@ const authMiddleware = async (c: any, next: any) => {
   // Add user info to context
   c.set('user', payload);
   await next();
+};
+
+// Role helpers and guard middleware
+const getRolePath = (role: string) => {
+  switch (role) {
+    case 'admin':
+      return '/admin';
+    case 'director':
+      return '/director';
+    case 'marketer':
+      return '/marketer';
+    case 'headtrainer':
+      return '/headtrainer';
+    case 'teacher':
+      return '/teacher';
+    case 'agent':
+      return '/agent';
+    default:
+      return '/dashboard';
+  }
+};
+
+const roleGuard = (allowedRoles: string[]) => {
+  return async (c: any, next: any) => {
+    const user = c.get('user');
+    if (!user) {
+      return c.redirect('/');
+    }
+    if (!allowedRoles.includes(user.role)) {
+      const path = getRolePath(user.role || '');
+      return c.redirect(path);
+    }
+    await next();
+  };
 };
 
 // Authentication Routes
@@ -56,6 +97,8 @@ app.post('/api/auth/login', async (c) => {
       role: user.role,
       fullName: user.full_name
     });
+    // Set cookie for subsequent page requests
+    c.header('Set-Cookie', 'ischoolgo_token=' + token + '; Path=/; Max-Age=604800; SameSite=Lax');
     
     return c.json({
       success: true,
@@ -100,6 +143,12 @@ app.post('/api/auth/verify', async (c) => {
     console.error('Token verification error:', error);
     return c.json({ valid: false }, 500);
   }
+});
+
+// Logout route to clear cookie
+app.post('/api/auth/logout', (c) => {
+  c.header('Set-Cookie', 'ischoolgo_token=; Path=/; Max-Age=0; SameSite=Lax');
+  return c.json({ success: true });
 });
 
 // API Routes (Protected)
@@ -454,7 +503,9 @@ app.get('/', (c) => {
                         localStorage.setItem('ischoolgo_user', JSON.stringify(response.data.user));
                         
                         // Redirect to dashboard
-                        window.location.href = '/dashboard';
+                        const __rp = (r) => ({admin:'/admin',director:'/director',marketer:'/marketer',headtrainer:'/headtrainer',teacher:'/teacher',agent:'/agent'})[r] || '/dashboard';
+                            const __ru = (typeof response !== 'undefined' && response?.data?.user?.role) ? response.data.user.role : (JSON.parse(localStorage.getItem('ischoolgo_user') || '{}').role);
+                            window.location.href = __rp(__ru);
                     } else {
                         showError('فشل في تسجيل الدخول');
                     }
@@ -477,7 +528,9 @@ app.get('/', (c) => {
                     }
                 }).then(response => {
                     if (response.data.valid) {
-                        window.location.href = '/dashboard';
+                        const __rp = (r) => ({admin:'/admin',director:'/director',marketer:'/marketer',headtrainer:'/headtrainer',teacher:'/teacher',agent:'/agent'})[r] || '/dashboard';
+                            const __ru = (typeof response !== 'undefined' && response?.data?.user?.role) ? response.data.user.role : (JSON.parse(localStorage.getItem('ischoolgo_user') || '{}').role);
+                            window.location.href = __rp(__ru);
                     } else {
                         localStorage.removeItem('ischoolgo_token');
                         localStorage.removeItem('ischoolgo_user');
@@ -494,7 +547,7 @@ app.get('/', (c) => {
 })
 
 // Dashboard Route - Role Selection (Protected)
-app.get('/dashboard', (c) => {
+app.get('/dashboard', authMiddleware, (c) => {
   return c.html(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
@@ -637,8 +690,10 @@ app.get('/dashboard', (c) => {
         <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
         <script>
             function logout() {
+                fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
                 localStorage.removeItem('ischoolgo_token');
                 localStorage.removeItem('ischoolgo_user');
+                document.cookie = 'ischoolgo_token=; Path=/; Max-Age=0; SameSite=Lax';
                 window.location.href = '/';
             }
 
@@ -659,7 +714,9 @@ app.get('/dashboard', (c) => {
                     }
                 }).then(response => {
                     if (response.data.valid) {
-                        document.getElementById('roleCards').style.display = 'grid';
+                        const role = response.data.user?.role || user.role;
+                        const rolePath = (r) => ({admin:'/admin',director:'/director',marketer:'/marketer',headtrainer:'/headtrainer',teacher:'/teacher',agent:'/agent'})[r] || '/dashboard';
+                        window.location.href = rolePath(role);
                     } else {
                         logout();
                     }
@@ -674,7 +731,7 @@ app.get('/dashboard', (c) => {
 })
 
 // Admin Dashboard
-app.get('/admin', async (c) => {
+app.get('/admin', authMiddleware, roleGuard(['admin']), (c) => {
   return c.html(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
@@ -960,12 +1017,12 @@ app.get('/admin', async (c) => {
 })
 
 // Marketer Dashboard Route
-app.get('/marketer', (c) => {
+app.get('/marketer', authMiddleware, roleGuard(['marketer']), (c) => {
   return c.html(marketerDashboard)
 })
 
 // Director Dashboard Route  
-app.get('/director', (c) => {
+app.get('/director', authMiddleware, roleGuard(['director']), (c) => {
   return c.html(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
@@ -1216,7 +1273,7 @@ app.get('/director', (c) => {
 })
 
 // Head Trainer Dashboard Route
-app.get('/headtrainer', (c) => {
+app.get('/headtrainer', authMiddleware, roleGuard(['headtrainer']), (c) => {
   return c.html(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
@@ -1530,7 +1587,7 @@ app.get('/headtrainer', (c) => {
 })
 
 // Teacher Dashboard Route
-app.get('/teacher', (c) => {
+app.get('/teacher', authMiddleware, roleGuard(['teacher']), (c) => {
   return c.html(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
@@ -1812,7 +1869,7 @@ app.get('/teacher', (c) => {
 })
 
 // Agent Dashboard Route
-app.get('/agent', (c) => {
+app.get('/agent', authMiddleware, roleGuard(['agent']), (c) => {
   return c.html(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">

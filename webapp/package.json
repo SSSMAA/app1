@@ -31,5 +31,7 @@
     "@hono/vite-dev-server": "^0.18.2",
     "vite": "^6.3.5",
     "typescript": "^5.0.0"
+    "miniflare": "^3.2024.8"
+
   }
 }
